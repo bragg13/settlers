@@ -31,6 +31,7 @@ export class Lobby {
   public addClient(client: AuthenticatedSocket): void {
     // add client
     this.clients.set(client.id, client);
+    this.instance.players.push(client.id);
 
     // socket joins this lobby
     client.join(this.id);
@@ -46,7 +47,7 @@ export class Lobby {
       Logger.log(`Lobby ${this.id} is full, starting game...`);
       this.instance.triggerStartGame();
     }
-
+    n;
     this.dispatchLobbyState();
   }
 
@@ -65,16 +66,11 @@ export class Lobby {
     this.dispatchLobbyState();
   }
 
-  // i dont need to send the player list every time
-  // i can just do that while lobby is being joined,
-  // the client has the list then
   public dispatchLobbyState(): void {
     const data: ServerPayloads[ServerEvents.LobbyState] = {
       lobbyId: this.id,
       hasStarted: this.instance.hasStarted,
       hasEnded: this.instance.hasEnded,
-      currentRound: this.instance.currentRound,
-      currentPlayerIndex: this.instance.currentPlayerIndex,
       players: Array.from(this.clients.values()).map((client) => ({
         username: client.data.username,
         color: client.data.color,
@@ -86,5 +82,9 @@ export class Lobby {
 
   public dispatchToLobby<T>(event: string, data: T): void {
     this.server.to(this.id).emit(event, data);
+  }
+
+  public dispatchToCurrentPlayer<T>(event: string, data: T): void {
+    this.clients.get(this.instance.getCurrentPlayer()).emit(event, data);
   }
 }

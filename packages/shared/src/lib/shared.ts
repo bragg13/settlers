@@ -22,6 +22,8 @@ import {
   Owner,
 } from './common/BoardTypes';
 
+import { State, GameAction } from './common/GameStates';
+
 export {
   // server
   SocketExceptions,
@@ -38,4 +40,6 @@ export {
   type Spot,
   type Tile,
   type Owner,
+  type State,
+  GameAction,
 };

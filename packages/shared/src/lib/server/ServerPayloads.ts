@@ -10,15 +10,24 @@ export type ServerPayloads = {
     lobbyId: string;
     hasStarted: boolean;
     hasEnded: boolean;
-    currentRound: number;
-    currentPlayerIndex: number;
+    // currentRound: number;
+    // currentPlayerIndex: number;
     players: Array<{
       username: string;
       color: string;
     }>;
   };
-  [ServerEvents.GameState]: {
-    // hex map and so on
-    map: string;
+  SETUP: {
+    currentPlayer: string;
+    availableActions: string[];
+    currentRound: number;
+    availableSpots: number[];
+    availableRoads: number[];
   };
+  DICE_ROLL: {};
+  TURN: {};
+  BUILD: {};
+  TRADE: {};
+  ROBBERS: {};
+  GAME_END: {};
 };

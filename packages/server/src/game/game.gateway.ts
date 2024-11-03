@@ -7,12 +7,17 @@ import {
   WebSocketGateway,
   WsResponse,
 } from '@nestjs/websockets';
-import { ClientEvents, ServerEvents } from '@settlers/shared';
+import {
+  ClientEvents,
+  ClientPayloads,
+  GameAction,
+  ServerEvents,
+} from '@settlers/shared';
 import { Server, Socket } from 'socket.io';
 import { AuthenticatedSocket } from './types';
 import { WsValidationPipe } from '../websocket/ws.validation-pipe';
 import { LobbyManager } from './lobby/lobby.manager';
-import { LobbyJoinDto } from './dto';
+import { LobbyJoinDto, SetupRoadDto, SetupSettlementDto } from './dto';
 
 @UsePipes(new WsValidationPipe())
 @WebSocketGateway({
@@ -55,13 +60,26 @@ export class GameGateway
   @SubscribeMessage(ClientEvents.LobbyLeave)
   onLobbyLeave(client: AuthenticatedSocket): void {
     client.data.lobby?.removeClient(client);
-
-    client.emit(ServerEvents.GameMessage, {
-      color: 'red',
-      message: 'Disconnected from lobby ',
-    }); // redundant bc of dispatchLobbyState
   }
 
-  // gestire qui gli eventi dal client
-  // e passarli a lobby.instance
+  // setup
+  @SubscribeMessage(GameAction.ActionSetupSettlement)
+  onActionSetupSettlement(
+    client: AuthenticatedSocket,
+    data: ClientPayloads[GameAction.ActionSetupSettlement]
+  ): void {
+    console.log(`setup settlement: ${data}`);
+    client.data.lobby?.instance.setupSettlement(client, data);
+  }
+
+  @SubscribeMessage(GameAction.ActionSetupRoad)
+  onActionSetupRoad(client: AuthenticatedSocket, data: SetupRoadDto): void {
+    client.data.lobby?.instance.setupRoad(client, data);
+  }
+
+  // dice roll
+  @SubscribeMessage(GameAction.ActionDiceRoll)
+  onActionDiceRoll(client: AuthenticatedSocket): void {
+    client.data.lobby?.instance.diceRoll(client);
+  }
 }
