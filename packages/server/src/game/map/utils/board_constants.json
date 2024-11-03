@@ -1,0 +1,31 @@
+{
+  "tileValues": [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
+  "resourceValues": [
+    "sheep",
+    "sheep",
+    "sheep",
+    "sheep",
+    "wood",
+    "wood",
+    "wood",
+    "wood",
+    "wheat",
+    "wheat",
+    "wheat",
+    "wheat",
+    "brick",
+    "brick",
+    "brick",
+    "ore",
+    "ore",
+    "ore",
+    "robbers"
+  ],
+  "developmentCards": {
+    "knight": 14,
+    "victoryPoint": 5,
+    "roadBuilding": 2,
+    "monopoly": 2,
+    "yearOfPlenty": 2
+  }
+}

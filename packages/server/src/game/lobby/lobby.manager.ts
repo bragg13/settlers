@@ -25,8 +25,7 @@ export class LobbyManager {
   }
 
   public createLobby(lobbyId: string): Lobby {
-    const maxClients = 4;
-    console.log(lobbyId);
+    const maxClients = 1; // will be 4
     const lobby = new Lobby(lobbyId, this.server, maxClients);
 
     // human-readable lobby id to connect to
@@ -36,7 +35,6 @@ export class LobbyManager {
 
   public joinLobby(lobbyId: string, client: AuthenticatedSocket): void {
     let lobby: Lobby = this.lobbies.get(lobbyId);
-    console.log(this.lobbies);
 
     // che succcede quando succedono le eccezioni?
     if (!lobby) {
@@ -56,4 +54,20 @@ export class LobbyManager {
   // periodically cleanup lobbies
   // @Cron("*/5 * * * *")
   // private lobbiesCleanup(): void {}
+  // for (const [lobbyId, lobby] of this.lobbies) {
+  //       const now = (new Date()).getTime();
+  //       const lobbyCreatedAt = lobby.createdAt.getTime();
+  //       const lobbyLifetime = now - lobbyCreatedAt;
+
+  //       if (lobbyLifetime > LOBBY_MAX_LIFETIME) {
+  //         lobby.dispatchToLobby<ServerPayloads[ServerEvents.GameMessage]>(ServerEvents.GameMessage, {
+  //           color: 'blue',
+  //           message: 'Game timed out',
+  //         });
+
+  //         lobby.instance.triggerFinish();
+
+  //         this.lobbies.delete(lobby.id);
+  //       }
+  //     }
 }

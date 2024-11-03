@@ -1,5 +1,4 @@
 import { Server, Socket } from 'socket.io';
-import { v4 } from 'uuid';
 import { AuthenticatedSocket } from '../types';
 import { Instance } from '../instance/instance';
 import { Logger } from '@nestjs/common';
@@ -44,7 +43,7 @@ export class Lobby {
     });
 
     if (this.clients.size >= this.maxClients) {
-      console.log(`Lobby ${this.id} is full, starting game...`);
+      Logger.log(`Lobby ${this.id} is full, starting game...`);
       this.instance.triggerStartGame();
     }
 

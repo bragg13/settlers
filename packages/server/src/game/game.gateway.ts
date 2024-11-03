@@ -61,4 +61,7 @@ export class GameGateway
       message: 'Disconnected from lobby ',
     }); // redundant bc of dispatchLobbyState
   }
+
+  // gestire qui gli eventi dal client
+  // e passarli a lobby.instance
 }

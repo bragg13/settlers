@@ -17,6 +17,30 @@ import { useLobbyState } from '../components/game/GameContext';
 type PageState = 'login' | 'lobby';
 
 const LobbyPage = () => {
+  useEffect(() => {
+    setFormLobby((prev) => ({
+      ...prev,
+      color: 'green',
+      username: 'andrea',
+      lobbyId: '1234',
+    }));
+    sm.emit({
+      event: ClientEvents.LobbyJoin,
+      data: {
+        ...formLobby,
+      },
+    });
+
+    // save username and color info to socket state
+    sm.socketStateDispatch({
+      type: 'CONNECT',
+      payload: {
+        username: formLobby.username,
+        color: formLobby.color,
+      },
+    });
+  }, []);
+
   const [formLobby, setFormLobby] = useState<
     ClientPayloads[ClientEvents.LobbyJoin]
   >({
@@ -56,26 +80,26 @@ const LobbyPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lobbyState.players.length]);
 
+  function onJoinClick(): void {
+    sm.emit({
+      event: ClientEvents.LobbyJoin,
+      data: {
+        ...formLobby,
+      },
+    });
+
+    // save username and color info to socket state
+    sm.socketStateDispatch({
+      type: 'CONNECT',
+      payload: {
+        username: formLobby.username,
+        color: formLobby.color,
+      },
+    });
+    setPageState('lobby');
+  }
+
   const renderLogin = () => {
-    function onJoinClick(event: React.MouseEvent<HTMLButtonElement>): void {
-      sm.emit({
-        event: ClientEvents.LobbyJoin,
-        data: {
-          ...formLobby,
-        },
-      });
-
-      // save username and color info to socket state
-      sm.socketStateDispatch({
-        type: 'CONNECT',
-        payload: {
-          username: formLobby.username,
-          color: formLobby.color,
-        },
-      });
-      setPageState('lobby');
-    }
-
     return (
       <>
         <Typography component="h1" variant="h5">
