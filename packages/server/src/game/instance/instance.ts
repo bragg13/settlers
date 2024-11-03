@@ -1,10 +1,11 @@
-import { ClientEvents, ClientPayloads, ServerEvents, ServerPayloads } from '@settlers/shared';
+import { ClientEvents, ClientPayloads, GameAction, ServerActionPayloads, ServerEvents, ServerPayloads } from '@settlers/shared';
 import { Lobby } from '../lobby/lobby';
 import { AuthenticatedSocket } from '../types';
 import { MapBoard } from '../map/map.board';
 import { GameFSM } from './gamefsm';
 import { Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
+type ServerActionPayload = keyof ServerActionPayloads
 
 export class Instance {
   // partita
@@ -16,6 +17,9 @@ export class Instance {
   private board: MapBoard = new MapBoard();
   private fsm: GameFSM = new GameFSM();
   public players: Socket['id'][] = [];
+
+  // stesso numero di giocatori, mi tiene conto degli step nel setup
+  public setupSteps: number[] = Array.from({ length: this.players.length }, (_, i) => 0);
 
   constructor(public readonly lobby: Lobby) {}
 
@@ -37,8 +41,11 @@ export class Instance {
   public currentPlayerGameState(): void {
     const currentPlayer = this.getCurrentPlayer();
     const availableActions = this.fsm.getAvailableActions();
-    this.lobby.dispatchToCurrentPlayer(ServerEvents.AvailableActions, {
+    const data: ServerActionPayload = {
       availableActions,
+    }
+
+    this.lobby.dispatchToCurrentPlayer(ServerEvents.AvailableActions, {
       availableRoads: this.board.getAvailableRoads(currentPlayer),
       availableSpots: this.board.getAvailableSpots(currentPlayer),
     });
@@ -100,11 +107,18 @@ export class Instance {
 
   // gestire qui la logica del gioco
   // e terminare con this.lobby.dispatchLobbyState per mandare aggionramenti a tutti i client
-  public setupSettlement(client: AuthenticatedSocket, data: ClientPayloads[ClientEvents.ActionSetupSettlement]): void {
-    if (this.fsm.getAvailableActions().includes(ClientEvents.ActionSetupSettlement))
-    this.fsm.handleAction(, data)
+  public setupSettlement(client: AuthenticatedSocket, data: ClientPayloads[GameAction.ActionSetupSettlement]): void {
+    if (this.fsm.getAvailableActions().includes(GameAction.ActionSetupSettlement)) {
+      this.board.buildSettlement(data.spotId, 'village', client.id)
+      this.setupSteps[this.currentPlayerIndex]++
+      this.currentPlayerGameState()
+
+    } else {
+      Logger.error('Not available action');
+    }
 
     Logger.log('setupSettlement');
+    this.dispatchGameState()
   }
   public setupRoad(client: AuthenticatedSocket, data: any): void {
     Logger.log('setupRoad');

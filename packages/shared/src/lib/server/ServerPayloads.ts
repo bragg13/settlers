@@ -17,17 +17,4 @@ export type ServerPayloads = {
       color: string;
     }>;
   };
-  SETUP: {
-    currentPlayer: string;
-    availableActions: string[];
-    currentRound: number;
-    availableSpots: number[];
-    availableRoads: number[];
-  };
-  DICE_ROLL: {};
-  TURN: {};
-  BUILD: {};
-  TRADE: {};
-  ROBBERS: {};
-  GAME_END: {};
 };

@@ -6,6 +6,7 @@ export function shared(): string {
 import { SocketExceptions } from './server/SocketExceptions';
 import { ServerEvents } from './server/ServerEvents';
 import { ServerPayloads } from './server/ServerPayloads';
+import { ServerActionPayloads } from './server/ServerActionPayloads';
 
 // client
 import { ClientEvents } from './client/ClientEvents';
@@ -29,10 +30,13 @@ export {
   SocketExceptions,
   ServerEvents,
   type ServerPayloads,
+  type ServerActionPayloads,
   type ServerExceptionResponse,
+
   // client
   ClientEvents,
   type ClientPayloads,
+
   // common
   type SettlementType,
   Resource,

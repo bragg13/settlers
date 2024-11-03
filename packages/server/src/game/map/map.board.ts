@@ -1,7 +1,7 @@
 import * as road_connections from './utils/road_connections.json';
 import * as board_constants from './utils/board_constants.json';
 import { Logger } from '@nestjs/common';
-import { Resource, Road, Spot, Tile } from '@settlers/shared';
+import { Resource, Road, SettlementType, Spot, Tile } from '@settlers/shared';
 
 export class MapBoard {
   private NUM_SPOTS = 54;
@@ -98,7 +98,7 @@ export class MapBoard {
   // building roads and settlements
   public buildSettlement(
     spot_id: Spot['id'],
-    settlement_type: Spot['settlementType'],
+    settlement_type: SettlementType,
     player: string
   ): void {
     this.spots.set(spot_id, {
