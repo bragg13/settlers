@@ -6,7 +6,9 @@ export class TurnSystem {
   private currentRound = 0;
   public players: Socket['id'][];
 
-  constructor(private readonly lobby: Lobby) {}
+  constructor(private readonly lobby: Lobby) {
+    this.players = Array.from(this.lobby.clients.keys());
+  }
 
   public getCurrentPlayer(): Socket['id'] {
     return this.players[this.currentPlayerIndex];

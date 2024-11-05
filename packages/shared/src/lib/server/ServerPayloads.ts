@@ -28,8 +28,8 @@ export type ServerPayloads = {
   };
   [ServerEvents.AvailableActions]: {
     availableActions: string[];
-    buildableSpots: Road[];
-    buildableRoads: Spot[];
+    buildableSpots: Spot[];
+    buildableRoads: Road[];
     buildableCities: Spot[];
     // ...
   };

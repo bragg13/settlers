@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io';
 import { Player } from '../shared';
 
 // settlement
@@ -5,7 +6,7 @@ export type SettlementType = 'city' | 'village' | null;
 export type Spot = {
   id: number;
   settlementType: SettlementType;
-  owner: Player | null;
+  owner: Socket['id'] | null;
 };
 
 // roads
@@ -13,7 +14,7 @@ export type Road = {
   from: Spot['id'];
   to: Spot['id'];
   id: number;
-  owner: Player | null;
+  owner: Socket['id'] | null;
 };
 
 // tiles

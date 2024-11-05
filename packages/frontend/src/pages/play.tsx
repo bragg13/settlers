@@ -117,7 +117,7 @@ const PlayPage = () => {
         {playerInformation.username}
       </Typography>
       <Button
-        id="buildSettlment"
+        id="buildSettelment"
         variant="contained"
         color="primary"
         disabled={!isPlaying}

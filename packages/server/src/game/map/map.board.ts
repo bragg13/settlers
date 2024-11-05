@@ -1,13 +1,26 @@
 import * as road_connections from './utils/road_connections.json';
 import * as board_constants from './utils/board_constants.json';
 import { Logger } from '@nestjs/common';
-import { Resource, Road, SettlementType, Spot, Tile } from '@settlers/shared';
+import {
+  GameAction,
+  Resource,
+  Road,
+  ServerEvents,
+  ServerPayloads,
+  SettlementType,
+  Spot,
+  Tile,
+} from '@settlers/shared';
+import { Socket } from 'socket.io';
+import { Delta } from './delta';
+import { randomInt } from 'crypto';
 
 export class MapBoard {
   private NUM_SPOTS = 54;
   private NUM_TILES = 19;
   public spots: Map<Spot['id'], Spot> = new Map<Spot['id'], Spot>();
   public tiles: Map<Tile['id'], Tile> = new Map<Tile['id'], Tile>();
+  deltas: Delta[] = [];
 
   public roads: {
     [from: Spot['id']]: {
@@ -44,6 +57,7 @@ export class MapBoard {
       owner: null,
     };
   }
+  public getDeltaUpdates(): ServerPayloads[ServerEvents.DeltaUpdate] {}
 
   public initBoard(): void {
     // initialise the 'graph' part of the board aka spots/roads
@@ -86,17 +100,19 @@ export class MapBoard {
   }
 
   // building roads and settlements
-  public getAvailableSpots = (player: string): Array<Spot['id']> => {
-    return [1, 5, 7];
+  public getAvailableSpots = (player: Socket['id']): Array<Spot> => {
+    const spot: Spot = { id: 1, owner: null, settlementType: null };
+    return [spot];
   };
-  public getAvailableRoads = (player: string): Array<Road['id']> => {
-    return [1, 5, 7]; // send also spot1/spot2
+  public getAvailableRoads = (player: Socket['id']): Array<Road> => {
+    const road: Road = { from: 0, to: 1, id: 0, owner: null };
+    return [road];
   };
 
   public buildSettlement(
     spot_id: Spot['id'],
     settlement_type: SettlementType,
-    player: string
+    player: Socket['id']
   ): void {
     this.spots.set(spot_id, {
       id: spot_id,
@@ -109,10 +125,48 @@ export class MapBoard {
     for (const adj of adjs) {
       console.log(adj);
     }
+
+    this.deltas.push({
+      action: GameAction.ActionBuildSettlement,
+      player,
+      details: {
+        newSettlement: spot_id,
+        adjacent: [...adjs],
+      },
+      timestamp: Date.now(),
+    });
   }
 
-  public buildRoad(spot1: Spot['id'], spot2: Spot['id'], player: string): void {
+  public buildRoad(
+    spot1: Spot['id'],
+    spot2: Spot['id'],
+    player: Socket['id']
+  ): void {
     this.roads[spot1][spot2].owner = player;
     this.roads[spot2][spot1].owner = player;
+
+    this.deltas.push({
+      action: GameAction.ActionBuildRoad,
+      player,
+      details: {
+        newRoad: this.roads[spot1][spot2],
+      },
+      timestamp: Date.now(),
+    });
+  }
+
+  public rollDice(player: Socket['id']): number[] {
+    const dice = [randomInt(1, 7), randomInt(1, 7)];
+
+    this.deltas.push({
+      action: GameAction.ActionDiceRoll,
+      player,
+      details: {
+        dice,
+      },
+      timestamp: Date.now(),
+    });
+
+    return dice;
   }
 }

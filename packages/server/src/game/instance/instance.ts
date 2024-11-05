@@ -13,7 +13,6 @@ import { Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { TurnSystem } from './turnsys';
 
-
 export class Instance {
   // partita
   public hasStarted = false;
@@ -34,18 +33,27 @@ export class Instance {
 
   // send available actions to the current player
   public dispatchAvailableActions(): void {
-    const availableActions: ServerPayloads[ServerEvents.AvailableActions] = {};
+    const currentPlayerIndex = this.turns.getCurrentPlayerIndex()
+    const currentPlayer = this.turns.getCurrentPlayer()
+    const availableActions = this.fsm.getAvailableActions(currentPlayerIndex)
+
+    const actions: ServerPayloads[ServerEvents.AvailableActions] = {
+      availableActions,
+      buildableSpots: availableActions.includes(GameAction.ActionSetupSettlement) || availableActions.includes(GameAction.ActionBuildSettlement) ? this.board.getAvailableSpots(currentPlayer) : null,
+      buildableRoads: availableActions.includes(GameAction.ActionSetupRoad) || availableActions.includes(GameAction.ActionBuildRoad) ? this.board.getAvailableRoads(currentPlayer) : null,
+      buildableCities: null
+    };
     this.lobby.dispatchToCurrentPlayer(
       ServerEvents.AvailableActions,
-      availableActions
+      actions
     );
   }
 
   // dispatch updates to all clients
   // questo va chiamato spesso all'interno di un singolo turnO
   public dispatchDeltaUpdate(): void {
-    const updates: ServerPayloads[ServerEvents.DeltaUpdate] = {};
-    this.lobby.dispatchToLobby(ServerEvents.DeltaUpdate, updates);
+    const updates: ServerPayloads[ServerEvents.DeltaUpdate] = this.board.getDeltaUpdates()
+      this.lobby.dispatchToLobby(ServerEvents.DeltaUpdate, updates);
   }
 
   /**
@@ -56,23 +64,17 @@ export class Instance {
     // start the game
     this.fsm.setupSteps = new Array(this.lobby.clients.size).fill(0);
     this.hasStarted = true;
-    this.turns = new TurnSystem(Array.from(this.lobby.clients.keys()));
+    this.turns = new TurnSystem(this.lobby);
 
     this.board.initBoard();
 
-    // send the initial game state to all clients
-    this.dispatchGameState();
+    // send the board tiles somehow
 
     // send available actions to the current player
     this.dispatchAvailableActions();
   }
 
   public triggerPlayerDisconnect(client: AuthenticatedSocket): void {
-    // se il giocatore che si è disconnesso è il giocatore corrente
-    // if (client.id === this.lobby.instance.currentPlayerIndex) {
-    //   // passa il turno al prossimo giocatore
-    //   this.lobby.instance.currentPlayerIndex++;
-    // }
     this.lobby.dispatchToLobby<ServerPayloads[ServerEvents.GameMessage]>(
       ServerEvents.GameMessage,
       {
@@ -88,40 +90,24 @@ export class Instance {
     client: AuthenticatedSocket,
     data: ClientPayloads[GameAction.ActionSetupSettlement]
   ): void {
-    // this can probably become some kind of decorator
-    }
     const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
     const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
 
-    // check that the action is legit from this state
     if (availableActions.includes(GameAction.ActionSetupSettlement)) {
       this.board.buildSettlement(data.spotId, 'village', client.id);
-      Logger.log('building settlement');
       this.fsm.setupSteps[currentPlayerIndex]++;
+      this.dispatchDeltaUpdate();
       this.dispatchAvailableActions();
-      this.dispatchGameState();
     } else {
       Logger.error('Not available action');
     }
   }
 
-  public setupRoad(
+  public onSetupRoad(
     client: AuthenticatedSocket,
     data: ClientPayloads[GameAction.ActionSetupRoad]
   ): void {
     // this can probably become some kind of decorator
-    if (client.id !== this.turns.getCurrentPlayer()) {
-      const warningMessage: ServerPayloads[ServerEvents.GameMessage] = {
-        color: 'red',
-        message: 'this is not your turn!',
-      };
-      this.lobby.dispatchToPlayer(
-        client.id,
-        ServerEvents.GameMessage,
-        warningMessage
-      );
-      return;
-    }
     const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
     const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
 
@@ -132,13 +118,24 @@ export class Instance {
       this.fsm.setupSteps[currentPlayerIndex]++;
       console.log(this.fsm.setupSteps[currentPlayerIndex]++);
       this.dispatchAvailableActions();
-      this.dispatchGameState();
+      this.dispatchDeltaUpdate();
     } else {
       Logger.error('Not available action');
     }
   }
-  public diceRoll(client: AuthenticatedSocket, data: any): void {
+  public onDiceRoll(client: AuthenticatedSocket, data: any): void {
     Logger.log('diceRoll');
+    // this.fsm.transitionTo(state) // to turn?
+  }
+
+  public onEndTurn(client: AuthenticatedSocket): void {
+    const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
+    const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
+
+    // check that the action is legit from this state
+    if (availableActions.includes(GameAction.ActionEndTurn)) {
+      // this.fsm.transitionTo(state) // to dice roll?
+      this.turns.nextTurn()
   }
 }
 
