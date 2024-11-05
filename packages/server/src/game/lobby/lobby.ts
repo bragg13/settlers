@@ -20,7 +20,7 @@ export class Lobby {
   >();
 
   public readonly instance: Instance = new Instance(this);
-  public chat: Chat = new Chat(this);
+  public readonly chat: Chat = new Chat(this);
 
   constructor(
     public readonly id: string,
@@ -33,7 +33,6 @@ export class Lobby {
   public addClient(client: AuthenticatedSocket): void {
     // add client
     this.clients.set(client.id, client);
-    // this.instance.players.push(client.id);
 
     // socket joins this lobby
     client.join(this.id);
@@ -68,11 +67,14 @@ export class Lobby {
     this.dispatchLobbyState();
   }
 
+  // questo viene chiamato solo a fine turno
   public dispatchLobbyState(): void {
     const data: ServerPayloads[ServerEvents.LobbyState] = {
       lobbyId: this.id,
       hasStarted: this.instance.hasStarted,
       hasEnded: this.instance.hasEnded,
+      currentPlayer: this.instance.turns.getCurrentPlayer(),
+      currentRound: this.instance.turns.getCurrentRound(),
       players: Array.from(this.clients.values()).map((client) => ({
         username: client.data.username,
         color: client.data.color,

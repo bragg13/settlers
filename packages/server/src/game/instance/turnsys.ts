@@ -1,16 +1,21 @@
 import { Socket } from 'socket.io';
+import { Lobby } from '../lobby/lobby';
 
 export class TurnSystem {
   private currentPlayerIndex = 0;
   private currentRound = 0;
+  public players: Socket['id'][];
 
-  constructor(public players: Socket['id'][]) {}
+  constructor(private readonly lobby: Lobby) {}
 
   public getCurrentPlayer(): Socket['id'] {
     return this.players[this.currentPlayerIndex];
   }
   public getCurrentPlayerIndex(): number {
     return this.currentPlayerIndex;
+  }
+  public getCurrentRound(): number {
+    return this.currentRound;
   }
 
   public nextTurn(): void {
@@ -19,6 +24,7 @@ export class TurnSystem {
       this.currentPlayerIndex = 0;
     }
     this.currentRound++;
+    this.lobby.dispatchLobbyState();
 
     console.log(`Player ${this.getCurrentPlayer()} is playing next`);
   }

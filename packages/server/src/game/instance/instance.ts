@@ -13,6 +13,7 @@ import { Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { TurnSystem } from './turnsys';
 
+
 export class Instance {
   // partita
   public hasStarted = false;
@@ -30,52 +31,21 @@ export class Instance {
    *  dispatching and sending to client(s)
    *
    */
+
   // send available actions to the current player
   public dispatchAvailableActions(): void {
-    const currentPlayer: Socket['id'] = this.turns.getCurrentPlayer();
-    const availableActions: GameAction[] = this.fsm.getAvailableActions(
-      this.turns.getCurrentPlayerIndex()
+    const availableActions: ServerPayloads[ServerEvents.AvailableActions] = {};
+    this.lobby.dispatchToCurrentPlayer(
+      ServerEvents.AvailableActions,
+      availableActions
     );
-    const state: State = this.fsm.getState();
-    console.log(`available actions for player ${currentPlayer}`);
-    console.log(`${availableActions}`);
-    const data = {
-      availableActions,
-    };
-
-    // additional data based on the state
-    switch (state) {
-      case 'SETUP':
-        if (availableActions.includes(GameAction.ActionSetupSettlement)) {
-          data['availableSpots'] = this.board.getAvailableSpots(currentPlayer);
-        } else if (availableActions.includes(GameAction.ActionSetupRoad)) {
-          data['availableRoads'] = this.board.getAvailableRoads(currentPlayer);
-        }
-        break;
-    }
-
-    this.lobby.dispatchToCurrentPlayer(ServerEvents.AvailableActions, data);
   }
 
-  // dispatch to all clients
-  public dispatchGameState(): void {
-    const currentPlayer = this.turns.getCurrentPlayer();
-    const gameState = this.fsm.getState();
-    console.log(`dispatching game state: ${gameState}`);
-
-    const data = {
-      currentPlayer,
-      currentRound: this.currentRound,
-      gameState: gameState,
-    };
-
-    this.lobby.dispatchToLobby(ServerEvents.GameState, data);
-  }
-
-  public getUsernameFromSocketId(socketId: Socket['id']): string {
-    return Array.from(this.lobby.clients.values()).filter(
-      (client) => client.id == socketId
-    )[0].data.username;
+  // dispatch updates to all clients
+  // questo va chiamato spesso all'interno di un singolo turnO
+  public dispatchDeltaUpdate(): void {
+    const updates: ServerPayloads[ServerEvents.DeltaUpdate] = {};
+    this.lobby.dispatchToLobby(ServerEvents.DeltaUpdate, updates);
   }
 
   /**
@@ -119,17 +89,6 @@ export class Instance {
     data: ClientPayloads[GameAction.ActionSetupSettlement]
   ): void {
     // this can probably become some kind of decorator
-    if (client.id !== this.turns.getCurrentPlayer()) {
-      const warningMessage: ServerPayloads[ServerEvents.GameMessage] = {
-        color: 'red',
-        message: 'this is not your turn!',
-      };
-      this.lobby.dispatchToPlayer(
-        client.id,
-        ServerEvents.GameMessage,
-        warningMessage
-      );
-      return;
     }
     const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
     const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
@@ -182,3 +141,9 @@ export class Instance {
     Logger.log('diceRoll');
   }
 }
+
+// public getUsernameFromSocketId(socketId: Socket['id']): string {
+//   return Array.from(this.lobby.clients.values()).filter(
+//     (client) => client.id == socketId
+//   )[0].data.username;
+// }

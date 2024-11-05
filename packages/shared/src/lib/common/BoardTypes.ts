@@ -23,10 +23,4 @@ export type Tile = {
   value: number;
 };
 
-export type Resource =
-  | 'WOOD '
-  | 'BRICK '
-  | 'SHEEP'
-  | 'WHEAT'
-  | 'ORE '
-  | 'ROBBERS ';
+export type Resource = 'WOOD' | 'BRICK' | 'SHEEP' | 'WHEAT' | 'ORE' | 'ROBBERS';

@@ -6,7 +6,13 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import { ClientEvents, ClientPayloads, GameAction } from '@settlers/shared';
+import {
+  ClientEvents,
+  ClientPayloads,
+  GameAction,
+  ServerEvents,
+  ServerPayloads,
+} from '@settlers/shared';
 import { Server, Socket } from 'socket.io';
 import { AuthenticatedSocket } from './types';
 import { WsValidationPipe } from '../websocket/ws.validation-pipe';
@@ -43,11 +49,27 @@ export class GameGateway
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
+  checkIsClientTurn(client: AuthenticatedSocket) {
+    const currentPlayer = client.data.lobby?.instance.turns.getCurrentPlayer();
+    if (client.id !== currentPlayer) {
+      const warningMessage: ServerPayloads[ServerEvents.GameMessage] = {
+        color: 'red',
+        message: "now it's not your turn!",
+      };
+      client.data.lobby?.dispatchToPlayer(
+        client.id,
+        ServerEvents.GameMessage,
+        warningMessage
+      );
+      return false;
+    }
+    return true;
+  }
+
   @SubscribeMessage(ClientEvents.LobbyJoin)
   onLobbyJoin(client: AuthenticatedSocket, data: LobbyJoinDto): void {
     client.data.username = data.username;
     client.data.color = data.color;
-    console.log(data);
     this.lobbyManager.joinLobby(data.lobbyId, client);
   }
 
@@ -62,21 +84,27 @@ export class GameGateway
     client: AuthenticatedSocket,
     data: ClientPayloads[GameAction.ActionSetupSettlement]
   ): void {
-    console.log(`setup settlement: ${data}`);
-
-    // check if it's player's turn
-    client.data.lobby?.instance.onSetupSettlement(client, data);
+    if (this.checkIsClientTurn(client)) {
+      client.data.lobby?.instance.onSetupSettlement(client, data);
+    }
   }
 
   @SubscribeMessage(GameAction.ActionSetupRoad)
-  onActionSetupRoad(client: AuthenticatedSocket, data: SetupRoadDto): void {
-    client.data.lobby?.instance.setupRoad(client, data);
+  onActionSetupRoad(
+    client: AuthenticatedSocket,
+    data: ClientPayloads[GameAction.ActionSetupRoad]
+  ): void {
+    if (this.checkIsClientTurn(client)) {
+      client.data.lobby?.instance.onSetupRoad(client, data);
+    }
   }
 
   // dice roll
   @SubscribeMessage(GameAction.ActionDiceRoll)
   onActionDiceRoll(client: AuthenticatedSocket): void {
-    client.data.lobby?.instance.diceRoll(client);
+    if (this.checkIsClientTurn(client)) {
+      client.data.lobby?.instance.onDiceRoll(client);
+    }
   }
 
   @SubscribeMessage(ClientEvents.ChatMessage)

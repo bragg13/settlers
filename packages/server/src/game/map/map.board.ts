@@ -9,16 +9,6 @@ export class MapBoard {
   public spots: Map<Spot['id'], Spot> = new Map<Spot['id'], Spot>();
   public tiles: Map<Tile['id'], Tile> = new Map<Tile['id'], Tile>();
 
-  /** {
-    from: {
-      to: {
-        id: number;
-        owner: string;
-        from: number;
-        to: number;
-      },
-    }
-  } */
   public roads: {
     [from: Spot['id']]: {
       [to: Spot['id']]: Road;
@@ -71,17 +61,17 @@ export class MapBoard {
     const tileValues = board_constants['tileValues'].sort(
       () => Math.random() - 0.5
     );
-    const tileResources = board_constants['resourceValues'].sort(
+    const tileResources: Resource[] = board_constants['resourceValues'].sort(
       () => Math.random() - 0.5
-    );
+    ) as Resource[];
     let valueIndex = 0;
 
     for (let i = 0; i < tileResources.length; i++) {
       const tileValue =
-        tileResources[i] === 'bandits' ? 7 : tileValues[valueIndex++];
+        tileResources[i] === 'ROBBERS' ? 7 : tileValues[valueIndex++];
 
       this.tiles.set(i + 1, {
-        resource: Resource[tileResources[i]],
+        resource: tileResources[i],
         value: tileValue,
         id: i + 1,
       });
