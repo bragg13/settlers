@@ -1,9 +1,11 @@
+import { Player } from '../shared';
+
 // settlement
 export type SettlementType = 'city' | 'village' | null;
 export type Spot = {
   id: number;
   settlementType: SettlementType;
-  owner: Owner;
+  owner: Player | null;
 };
 
 // roads
@@ -11,9 +13,8 @@ export type Road = {
   from: Spot['id'];
   to: Spot['id'];
   id: number;
-  owner: Owner;
+  owner: Player | null;
 };
-export type Owner = string | null;
 
 // tiles
 export type Tile = {
@@ -22,11 +23,10 @@ export type Tile = {
   value: number;
 };
 
-export enum Resource {
-  WOOD = 'wood',
-  BRICK = 'brick',
-  SHEEP = 'sheep',
-  WHEAT = 'wheat',
-  ORE = 'ore',
-  ROBBERS = 'robbers',
-}
+export type Resource =
+  | 'WOOD '
+  | 'BRICK '
+  | 'SHEEP'
+  | 'WHEAT'
+  | 'ORE '
+  | 'ROBBERS ';

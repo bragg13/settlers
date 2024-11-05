@@ -1,10 +1,10 @@
-export type ServerActionPayloads = {
+import { Road, Spot } from '../shared';
+
+export type ServerActionPayloadsWrapper = {
   SETUP: {
-    currentPlayer: string;
     availableActions: string[];
-    currentRound: number;
-    availableSpots: number[] | null;
-    availableRoads: number[] | null;
+    availableSpots: Spot[] | null;
+    availableRoads: Road[] | null;
   };
   DICE_ROLL: {};
   TURN: {};

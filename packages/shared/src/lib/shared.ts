@@ -6,12 +6,12 @@ export function shared(): string {
 import { SocketExceptions } from './server/SocketExceptions';
 import { ServerEvents } from './server/ServerEvents';
 import { ServerPayloads } from './server/ServerPayloads';
-import { ServerActionPayloads } from './server/ServerActionPayloads';
+import { ServerActionPayloadsWrapper } from './server/ServerActionPayloads';
 
 // client
-import { ClientEvents } from './client/ClientEvents';
+import { GameAction, ClientEvents } from './client/ClientEvents';
 import { ClientPayloads } from './client/ClientPayloads';
-import { ServerExceptionResponse } from './server/types';
+import { ServerExceptionResponse, Player } from './server/types';
 
 // common
 import {
@@ -20,30 +20,29 @@ import {
   Road,
   Spot,
   Tile,
-  Owner,
 } from './common/BoardTypes';
 
-import { State, GameAction } from './common/GameStates';
+import { State } from './common/GameStates';
 
 export {
   // server
   SocketExceptions,
   ServerEvents,
   type ServerPayloads,
-  type ServerActionPayloads,
+  type ServerActionPayloadsWrapper,
   type ServerExceptionResponse,
 
   // client
   ClientEvents,
   type ClientPayloads,
+  type Player,
 
   // common
   type SettlementType,
-  Resource,
+  type Resource,
   type Road,
   type Spot,
   type Tile,
-  type Owner,
   type State,
   GameAction,
 };

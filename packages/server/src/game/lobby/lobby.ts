@@ -33,7 +33,7 @@ export class Lobby {
   public addClient(client: AuthenticatedSocket): void {
     // add client
     this.clients.set(client.id, client);
-    this.instance.players.push(client.id);
+    // this.instance.players.push(client.id);
 
     // socket joins this lobby
     client.join(this.id);
@@ -76,6 +76,7 @@ export class Lobby {
       players: Array.from(this.clients.values()).map((client) => ({
         username: client.data.username,
         color: client.data.color,
+        socketId: client.id,
       })),
     };
 
@@ -88,5 +89,13 @@ export class Lobby {
 
   public dispatchToCurrentPlayer<T>(event: string, data: T): void {
     this.clients.get(this.instance.turns.getCurrentPlayer()).emit(event, data);
+  }
+
+  public dispatchToPlayer<T>(
+    socketId: Socket['id'],
+    event: string,
+    data: T
+  ): void {
+    this.clients.get(socketId).emit(event, data);
   }
 }

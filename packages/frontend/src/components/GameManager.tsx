@@ -1,15 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSocketManager } from '../hooks/useSocketManager';
 import { ServerEvents, ServerPayloads } from '@settlers/shared';
 import PlayPage from '../pages/play';
 import LobbyPage from '../pages/lobby';
 import { showNotification } from '@mantine/notifications';
-import { useGameState, useLobbyState } from './game/GameContext';
+import {
+  useGameState,
+  useLobbyState,
+  usePlayerInformation,
+} from './game/GameContext';
 
 const GameManager = () => {
   const sm = useSocketManager();
   const { lobbyState, setLobbyState } = useLobbyState();
   const { gameState, setGameState } = useGameState();
+  const { playerInformation } = usePlayerInformation();
 
   useEffect(() => {
     sm.connect();
@@ -17,7 +22,6 @@ const GameManager = () => {
     const onGameMessage = (data: ServerPayloads[ServerEvents.GameMessage]) => {
       console.log('game message', data);
       showNotification({
-        title: 'ciao',
         message: data.message,
         color: data.color,
       });
@@ -37,6 +41,10 @@ const GameManager = () => {
       data: ServerPayloads[ServerEvents.AvailableActions]
     ) => {
       console.log('available actions', data);
+      setGameState((prevState) => ({
+        ...prevState,
+        availableActions: { ...data },
+      }));
     };
 
     const onChatMessage = (data: ServerPayloads[ServerEvents.ChatMessage]) => {

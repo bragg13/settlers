@@ -3,6 +3,7 @@ import {
   GameAction,
   ServerEvents,
   ServerPayloads,
+  State,
 } from '@settlers/shared';
 import { Lobby } from '../lobby/lobby';
 import { AuthenticatedSocket } from '../types';
@@ -25,15 +26,19 @@ export class Instance {
 
   constructor(public readonly lobby: Lobby) {}
 
+  /**
+   *  dispatching and sending to client(s)
+   *
+   */
   // send available actions to the current player
   public dispatchAvailableActions(): void {
-    const currentPlayer: string = this.turns.getCurrentPlayer();
-    const availableActions = this.fsm.getAvailableActions(
+    const currentPlayer: Socket['id'] = this.turns.getCurrentPlayer();
+    const availableActions: GameAction[] = this.fsm.getAvailableActions(
       this.turns.getCurrentPlayerIndex()
     );
-    const state = this.fsm.getState();
-    console.log(state);
-    console.log(typeof state);
+    const state: State = this.fsm.getState();
+    console.log(`available actions for player ${currentPlayer}`);
+    console.log(`${availableActions}`);
     const data = {
       availableActions,
     };
@@ -67,22 +72,23 @@ export class Instance {
     this.lobby.dispatchToLobby(ServerEvents.GameState, data);
   }
 
+  public getUsernameFromSocketId(socketId: Socket['id']): string {
+    return Array.from(this.lobby.clients.values()).filter(
+      (client) => client.id == socketId
+    )[0].data.username;
+  }
+
+  /**
+   *  receiving data from the clients
+   *
+   */
   public triggerStartGame(): void {
     // start the game
     this.fsm.setupSteps = new Array(this.lobby.clients.size).fill(0);
     this.hasStarted = true;
-    this.turns = new TurnSystem(this.players);
+    this.turns = new TurnSystem(Array.from(this.lobby.clients.keys()));
 
     this.board.initBoard();
-
-    // send a message to the lobby that the game started
-    this.lobby.dispatchToLobby<ServerPayloads[ServerEvents.GameMessage]>(
-      ServerEvents.GameMessage,
-      {
-        color: 'green',
-        message: 'Game started',
-      }
-    );
 
     // send the initial game state to all clients
     this.dispatchGameState();
@@ -108,30 +114,69 @@ export class Instance {
 
   // gestire qui la logica del gioco
   // e terminare con this.lobby.dispatchLobbyState per mandare aggionramenti a tutti i client
-  public setupSettlement(
+  public onSetupSettlement(
     client: AuthenticatedSocket,
     data: ClientPayloads[GameAction.ActionSetupSettlement]
   ): void {
+    // this can probably become some kind of decorator
+    if (client.id !== this.turns.getCurrentPlayer()) {
+      const warningMessage: ServerPayloads[ServerEvents.GameMessage] = {
+        color: 'red',
+        message: 'this is not your turn!',
+      };
+      this.lobby.dispatchToPlayer(
+        client.id,
+        ServerEvents.GameMessage,
+        warningMessage
+      );
+      return;
+    }
     const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
+    const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
 
-    if (
-      this.fsm
-        .getAvailableActions(currentPlayerIndex)
-        .includes(GameAction.ActionSetupSettlement)
-    ) {
+    // check that the action is legit from this state
+    if (availableActions.includes(GameAction.ActionSetupSettlement)) {
       this.board.buildSettlement(data.spotId, 'village', client.id);
+      Logger.log('building settlement');
       this.fsm.setupSteps[currentPlayerIndex]++;
       this.dispatchAvailableActions();
+      this.dispatchGameState();
     } else {
       Logger.error('Not available action');
     }
-
-    Logger.log('setupSettlement');
-    this.dispatchGameState();
   }
 
-  public setupRoad(client: AuthenticatedSocket, data: any): void {
-    Logger.log('setupRoad');
+  public setupRoad(
+    client: AuthenticatedSocket,
+    data: ClientPayloads[GameAction.ActionSetupRoad]
+  ): void {
+    // this can probably become some kind of decorator
+    if (client.id !== this.turns.getCurrentPlayer()) {
+      const warningMessage: ServerPayloads[ServerEvents.GameMessage] = {
+        color: 'red',
+        message: 'this is not your turn!',
+      };
+      this.lobby.dispatchToPlayer(
+        client.id,
+        ServerEvents.GameMessage,
+        warningMessage
+      );
+      return;
+    }
+    const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
+    const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
+
+    // check that the action is legit from this state
+    if (availableActions.includes(GameAction.ActionSetupRoad)) {
+      this.board.buildRoad(data.spot1, data.spot2, client.id);
+      Logger.log('building settlement');
+      this.fsm.setupSteps[currentPlayerIndex]++;
+      console.log(this.fsm.setupSteps[currentPlayerIndex]++);
+      this.dispatchAvailableActions();
+      this.dispatchGameState();
+    } else {
+      Logger.error('Not available action');
+    }
   }
   public diceRoll(client: AuthenticatedSocket, data: any): void {
     Logger.log('diceRoll');

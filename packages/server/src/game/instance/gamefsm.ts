@@ -33,6 +33,9 @@ export class GameFSM {
   }
 
   public getActionsForSetup(currentPlayerIndex: number): GameAction[] {
+    Logger.log(
+      `setup steps for ${currentPlayerIndex} are ${this.setupSteps[currentPlayerIndex]}`
+    );
     switch (this.setupSteps[currentPlayerIndex]) {
       case 0:
         // game just started

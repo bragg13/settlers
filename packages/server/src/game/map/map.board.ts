@@ -100,7 +100,7 @@ export class MapBoard {
     return [1, 5, 7];
   };
   public getAvailableRoads = (player: string): Array<Road['id']> => {
-    return [1, 5, 7];
+    return [1, 5, 7]; // send also spot1/spot2
   };
 
   public buildSettlement(

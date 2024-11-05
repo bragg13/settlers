@@ -12,13 +12,11 @@ export type ClientPayloads = {
   // setup
   [GameAction.ActionSetupSettlement]: {
     spotId: Spot['id'];
-    // can obtain by socket id
-    // player: string;
-    // color: string;
-    // the reply will be the updated game state with the new settlement
   };
   [GameAction.ActionSetupRoad]: {
     roadId: Road['id'];
+    spot1: Spot['id'];
+    spot2: Spot['id'];
   };
 
   // dice roll - no payload, the server actually rolls the dices

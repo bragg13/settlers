@@ -63,7 +63,9 @@ export class GameGateway
     data: ClientPayloads[GameAction.ActionSetupSettlement]
   ): void {
     console.log(`setup settlement: ${data}`);
-    client.data.lobby?.instance.setupSettlement(client, data);
+
+    // check if it's player's turn
+    client.data.lobby?.instance.onSetupSettlement(client, data);
   }
 
   @SubscribeMessage(GameAction.ActionSetupRoad)

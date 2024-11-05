@@ -12,38 +12,41 @@ import {
   ServerPayloads,
 } from '@settlers/shared';
 import { Avatar, CircularProgress, Divider, Radio, Stack } from '@mui/material';
-import { useLobbyState } from '../components/game/GameContext';
+import {
+  useLobbyState,
+  usePlayerInformation,
+} from '../components/game/GameContext';
 
 type PageState = 'login' | 'lobby';
 
 const LobbyPage = () => {
   // debug only - automactically join lobby
-  const autoLogin = false;
-  useEffect(() => {
-    if (autoLogin) {
-      setFormLobby((prev) => ({
-        ...prev,
-        color: 'green',
-        username: 'andrea',
-        lobbyId: '1234',
-      }));
-      sm.emit({
-        event: ClientEvents.LobbyJoin,
-        data: {
-          ...formLobby,
-        },
-      });
+  // const autoLogin = false;
+  // useEffect(() => {
+  //   if (autoLogin) {
+  //     setFormLobby((prev) => ({
+  //       ...prev,
+  //       color: 'green',
+  //       username: 'andrea',
+  //       lobbyId: '1234',
+  //     }));
+  //     sm.emit({
+  //       event: ClientEvents.LobbyJoin,
+  //       data: {
+  //         ...formLobby,
+  //       },
+  //     });
 
-      // save username and color info to socket state
-      sm.socketStateDispatch({
-        type: 'CONNECT',
-        payload: {
-          username: formLobby.username,
-          color: formLobby.color,
-        },
-      });
-    }
-  }, []);
+  //     // save username and color info to socket state
+  //     sm.socketStateDispatch({
+  //       type: 'CONNECT',
+  //       payload: {
+  //         username: formLobby.username,
+  //         color: formLobby.color,
+  //       },
+  //     });
+  //   }
+  // }, []);
 
   // lobby state and player list
   const [formLobby, setFormLobby] = useState<
@@ -53,6 +56,7 @@ const LobbyPage = () => {
     color: '',
     lobbyId: '',
   });
+  const { playerInformation, setPlayerInformation } = usePlayerInformation();
   const [pageState, setPageState] = useState<PageState>('login');
   const [players, setPlayers] = useState<{ username: string; color: string }[]>(
     []
@@ -63,7 +67,6 @@ const LobbyPage = () => {
 
   // update players list when new player joins
   useEffect(() => {
-    console.log(lobbyState.players.length, players.length);
     if (lobbyState.players.length !== players.length) {
       setPlayers(lobbyState.players);
     }
@@ -101,6 +104,11 @@ const LobbyPage = () => {
         username: formLobby.username,
         color: formLobby.color,
       },
+    });
+    setPlayerInformation({
+      username: formLobby.username,
+      color: formLobby.color,
+      socketId: sm.getSocketId(),
     });
     setPageState('lobby');
   }

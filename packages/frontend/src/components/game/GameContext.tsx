@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { ServerEvents, ServerPayloads } from '@settlers/shared';
+import { createContext, useContext, useState, ReactNode, useRef } from 'react';
+import { Player, ServerEvents, ServerPayloads } from '@settlers/shared';
 import { GameContextType } from './types';
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -21,9 +21,22 @@ export const GameContextProvider = ({ children }: { children: ReactNode }) => {
     currentRound: 0,
   });
 
+  const [playerInformation, setPlayerInformation] = useState<Player>({
+    color: '',
+    socketId: '',
+    username: '',
+  });
+
   return (
     <GameContext.Provider
-      value={{ lobbyState, setLobbyState, gameState, setGameState }}
+      value={{
+        lobbyState,
+        setLobbyState,
+        gameState,
+        setGameState,
+        setPlayerInformation,
+        playerInformation,
+      }}
     >
       {children}
     </GameContext.Provider>
@@ -49,5 +62,16 @@ export const useGameState = () => {
   return {
     gameState: context.gameState,
     setGameState: context.setGameState,
+  };
+};
+
+export const usePlayerInformation = () => {
+  const context = useContext(GameContext);
+  if (!context) {
+    throw new Error('useGameContext must be used within a GameContextProvider');
+  }
+  return {
+    setPlayerInformation: context.setPlayerInformation,
+    playerInformation: context.playerInformation,
   };
 };

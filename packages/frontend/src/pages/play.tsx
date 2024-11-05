@@ -1,10 +1,16 @@
-import { Button, Stack, TextField } from '@mui/material';
+import { Button, Stack, TextField, Typography } from '@mui/material';
 import { useSocketManager } from '../hooks/useSocketManager';
 import { ClientEvents, GameAction } from '@settlers/shared';
 import { useState } from 'react';
+import {
+  useGameState,
+  usePlayerInformation,
+} from '../components/game/GameContext';
 
 const PlayPage = () => {
   const [msg, setMsg] = useState('');
+  const { gameState } = useGameState();
+  const { playerInformation } = usePlayerInformation();
   // const world = useRef(null);
   // const location = useLocation();
   // const [loaded, setLoaded] = useState(false);
@@ -103,13 +109,18 @@ const PlayPage = () => {
   //   world.current.handlePassTurn();
   // };
   const sm = useSocketManager();
+  const isPlaying = playerInformation.socketId === gameState.currentPlayer;
 
   return (
     <Stack direction="row" gap={4}>
+      <Typography sx={{ backgroundColor: playerInformation.color }}>
+        {playerInformation.username}
+      </Typography>
       <Button
         id="buildSettlment"
         variant="contained"
         color="primary"
+        disabled={!isPlaying}
         onClick={() => {
           sm.emit({
             event: GameAction.ActionSetupSettlement,
@@ -124,10 +135,14 @@ const PlayPage = () => {
 
       <Button
         id="buildRoad"
+        disabled={!isPlaying}
         variant="contained"
         color="primary"
         onClick={() => {
-          sm.emit({ event: GameAction.ActionSetupRoad, data: { roadId: 6 } });
+          sm.emit({
+            event: GameAction.ActionSetupRoad,
+            data: { spot1: 6, spot2: 4, roadId: 3 },
+          });
         }}
       >
         build road
@@ -136,6 +151,7 @@ const PlayPage = () => {
         id="rollDice"
         variant="contained"
         color="primary"
+        disabled={!isPlaying}
         onClick={() => {
           sm.emit({ event: GameAction.ActionDiceRoll, data: {} });
         }}
