@@ -24,6 +24,9 @@ export type ClientPayloads = {
   // dice roll - no payload, the server actually rolls the dices
   [GameAction.ActionDiceRoll]: null;
 
+  [ClientEvents.ChatMessage]: {
+    text: string;
+  };
   // robbers
   // [ClientEvents.ActionMoveRobber]: {
 

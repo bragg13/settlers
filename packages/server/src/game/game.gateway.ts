@@ -5,19 +5,13 @@ import {
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
-  WsResponse,
 } from '@nestjs/websockets';
-import {
-  ClientEvents,
-  ClientPayloads,
-  GameAction,
-  ServerEvents,
-} from '@settlers/shared';
+import { ClientEvents, ClientPayloads, GameAction } from '@settlers/shared';
 import { Server, Socket } from 'socket.io';
 import { AuthenticatedSocket } from './types';
 import { WsValidationPipe } from '../websocket/ws.validation-pipe';
 import { LobbyManager } from './lobby/lobby.manager';
-import { LobbyJoinDto, SetupRoadDto, SetupSettlementDto } from './dto';
+import { LobbyJoinDto, SetupRoadDto } from './dto';
 
 @UsePipes(new WsValidationPipe())
 @WebSocketGateway({
@@ -81,5 +75,13 @@ export class GameGateway
   @SubscribeMessage(GameAction.ActionDiceRoll)
   onActionDiceRoll(client: AuthenticatedSocket): void {
     client.data.lobby?.instance.diceRoll(client);
+  }
+
+  @SubscribeMessage(ClientEvents.ChatMessage)
+  onChatMessage(
+    client: AuthenticatedSocket,
+    data: ClientPayloads[ClientEvents.ChatMessage]
+  ): void {
+    client.data.lobby?.chat.addMessage(client, data.text);
   }
 }

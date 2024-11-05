@@ -3,4 +3,5 @@ export enum ServerEvents {
   GameMessage = 'server.gameMessage',
   GameState = 'server.gameState',
   AvailableActions = 'server.availableActions',
+  ChatMessage = 'server.chatMessage',
 }

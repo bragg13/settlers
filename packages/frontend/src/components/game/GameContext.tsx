@@ -11,15 +11,14 @@ export const GameContextProvider = ({ children }: { children: ReactNode }) => {
     lobbyId: '',
     hasStarted: false,
     hasEnded: false,
-    currentRound: 0,
-    currentPlayerIndex: 0,
     players: [],
   });
 
   const [gameState, setGameState] = useState<
     ServerPayloads[ServerEvents.GameState]
   >({
-    map: '',
+    currentPlayer: '',
+    currentRound: 0,
   });
 
   return (

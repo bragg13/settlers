@@ -17,30 +17,35 @@ import { useLobbyState } from '../components/game/GameContext';
 type PageState = 'login' | 'lobby';
 
 const LobbyPage = () => {
+  // debug only - automactically join lobby
+  const autoLogin = false;
   useEffect(() => {
-    setFormLobby((prev) => ({
-      ...prev,
-      color: 'green',
-      username: 'andrea',
-      lobbyId: '1234',
-    }));
-    sm.emit({
-      event: ClientEvents.LobbyJoin,
-      data: {
-        ...formLobby,
-      },
-    });
+    if (autoLogin) {
+      setFormLobby((prev) => ({
+        ...prev,
+        color: 'green',
+        username: 'andrea',
+        lobbyId: '1234',
+      }));
+      sm.emit({
+        event: ClientEvents.LobbyJoin,
+        data: {
+          ...formLobby,
+        },
+      });
 
-    // save username and color info to socket state
-    sm.socketStateDispatch({
-      type: 'CONNECT',
-      payload: {
-        username: formLobby.username,
-        color: formLobby.color,
-      },
-    });
+      // save username and color info to socket state
+      sm.socketStateDispatch({
+        type: 'CONNECT',
+        payload: {
+          username: formLobby.username,
+          color: formLobby.color,
+        },
+      });
+    }
   }, []);
 
+  // lobby state and player list
   const [formLobby, setFormLobby] = useState<
     ClientPayloads[ClientEvents.LobbyJoin]
   >({
@@ -55,6 +60,15 @@ const LobbyPage = () => {
   const {
     lobbyState,
   }: { lobbyState: ServerPayloads[ServerEvents.LobbyState] } = useLobbyState();
+
+  // update players list when new player joins
+  useEffect(() => {
+    console.log(lobbyState.players.length, players.length);
+    if (lobbyState.players.length !== players.length) {
+      setPlayers(lobbyState.players);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lobbyState.players.length]);
 
   const controlProps = (item: string) => ({
     checked: formLobby.color === item,
@@ -71,14 +85,6 @@ const LobbyPage = () => {
   });
 
   const sm = useSocketManager();
-
-  useEffect(() => {
-    console.log(lobbyState.players.length, players.length);
-    if (lobbyState.players.length !== players.length) {
-      setPlayers(lobbyState.players);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lobbyState.players.length]);
 
   function onJoinClick(): void {
     sm.emit({

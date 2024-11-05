@@ -96,6 +96,13 @@ export class MapBoard {
   }
 
   // building roads and settlements
+  public getAvailableSpots = (player: string): Array<Spot['id']> => {
+    return [1, 5, 7];
+  };
+  public getAvailableRoads = (player: string): Array<Road['id']> => {
+    return [1, 5, 7];
+  };
+
   public buildSettlement(
     spot_id: Spot['id'],
     settlement_type: SettlementType,

@@ -1,11 +1,16 @@
-import { ClientEvents, ClientPayloads, GameAction, ServerActionPayloads, ServerEvents, ServerPayloads } from '@settlers/shared';
+import {
+  ClientPayloads,
+  GameAction,
+  ServerEvents,
+  ServerPayloads,
+} from '@settlers/shared';
 import { Lobby } from '../lobby/lobby';
 import { AuthenticatedSocket } from '../types';
 import { MapBoard } from '../map/map.board';
 import { GameFSM } from './gamefsm';
 import { Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
-type ServerActionPayload = keyof ServerActionPayloads
+import { TurnSystem } from './turnsys';
 
 export class Instance {
   // partita
@@ -13,65 +18,61 @@ export class Instance {
   public hasEnded = false;
   public isPaused = false;
   public currentRound = 0;
-  public currentPlayerIndex = 0;
   private board: MapBoard = new MapBoard();
   private fsm: GameFSM = new GameFSM();
   public players: Socket['id'][] = [];
-
-  // stesso numero di giocatori, mi tiene conto degli step nel setup
-  public setupSteps: number[] = Array.from({ length: this.players.length }, (_, i) => 0);
+  public turns: TurnSystem;
 
   constructor(public readonly lobby: Lobby) {}
 
-  public getCurrentPlayer(): Socket['id'] {
-    return this.players[this.currentPlayerIndex];
-  }
-
-  public nextTurn(): void {
-    this.currentPlayerIndex++;
-    if (this.currentPlayerIndex >= this.lobby.clients.size) {
-      this.currentPlayerIndex = 0;
-    }
-    this.currentRound++;
-
-    console.log(`Player ${this.getCurrentPlayer()} is playing next`);
-  }
-
   // send available actions to the current player
-  public currentPlayerGameState(): void {
-    const currentPlayer = this.getCurrentPlayer();
-    const availableActions = this.fsm.getAvailableActions();
-    const data: ServerActionPayload = {
+  public dispatchAvailableActions(): void {
+    const currentPlayer: string = this.turns.getCurrentPlayer();
+    const availableActions = this.fsm.getAvailableActions(
+      this.turns.getCurrentPlayerIndex()
+    );
+    const state = this.fsm.getState();
+    console.log(state);
+    console.log(typeof state);
+    const data = {
       availableActions,
+    };
+
+    // additional data based on the state
+    switch (state) {
+      case 'SETUP':
+        if (availableActions.includes(GameAction.ActionSetupSettlement)) {
+          data['availableSpots'] = this.board.getAvailableSpots(currentPlayer);
+        } else if (availableActions.includes(GameAction.ActionSetupRoad)) {
+          data['availableRoads'] = this.board.getAvailableRoads(currentPlayer);
+        }
+        break;
     }
 
-    this.lobby.dispatchToCurrentPlayer(ServerEvents.AvailableActions, {
-      availableRoads: this.board.getAvailableRoads(currentPlayer),
-      availableSpots: this.board.getAvailableSpots(currentPlayer),
-    });
+    this.lobby.dispatchToCurrentPlayer(ServerEvents.AvailableActions, data);
   }
 
   // dispatch to all clients
   public dispatchGameState(): void {
-    const currentPlayer = this.getCurrentPlayer();
+    const currentPlayer = this.turns.getCurrentPlayer();
     const gameState = this.fsm.getState();
-    console.log(`dispatching game state: ${gameState}`)
+    console.log(`dispatching game state: ${gameState}`);
 
-    let data: ServerPayloads[typeof gameState] = {
+    const data = {
       currentPlayer,
       currentRound: this.currentRound,
       gameState: gameState,
     };
-
-    if (gameState === ) {
-    }
 
     this.lobby.dispatchToLobby(ServerEvents.GameState, data);
   }
 
   public triggerStartGame(): void {
     // start the game
+    this.fsm.setupSteps = new Array(this.lobby.clients.size).fill(0);
     this.hasStarted = true;
+    this.turns = new TurnSystem(this.players);
+
     this.board.initBoard();
 
     // send a message to the lobby that the game started
@@ -87,7 +88,7 @@ export class Instance {
     this.dispatchGameState();
 
     // send available actions to the current player
-    this.currentPlayerGameState()
+    this.dispatchAvailableActions();
   }
 
   public triggerPlayerDisconnect(client: AuthenticatedSocket): void {
@@ -107,19 +108,28 @@ export class Instance {
 
   // gestire qui la logica del gioco
   // e terminare con this.lobby.dispatchLobbyState per mandare aggionramenti a tutti i client
-  public setupSettlement(client: AuthenticatedSocket, data: ClientPayloads[GameAction.ActionSetupSettlement]): void {
-    if (this.fsm.getAvailableActions().includes(GameAction.ActionSetupSettlement)) {
-      this.board.buildSettlement(data.spotId, 'village', client.id)
-      this.setupSteps[this.currentPlayerIndex]++
-      this.currentPlayerGameState()
+  public setupSettlement(
+    client: AuthenticatedSocket,
+    data: ClientPayloads[GameAction.ActionSetupSettlement]
+  ): void {
+    const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
 
+    if (
+      this.fsm
+        .getAvailableActions(currentPlayerIndex)
+        .includes(GameAction.ActionSetupSettlement)
+    ) {
+      this.board.buildSettlement(data.spotId, 'village', client.id);
+      this.fsm.setupSteps[currentPlayerIndex]++;
+      this.dispatchAvailableActions();
     } else {
       Logger.error('Not available action');
     }
 
     Logger.log('setupSettlement');
-    this.dispatchGameState()
+    this.dispatchGameState();
   }
+
   public setupRoad(client: AuthenticatedSocket, data: any): void {
     Logger.log('setupRoad');
   }

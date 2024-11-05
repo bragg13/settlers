@@ -25,7 +25,7 @@ export class LobbyManager {
   }
 
   public createLobby(lobbyId: string): Lobby {
-    const maxClients = 1; // will be 4
+    const maxClients = 2; // will be 4
     const lobby = new Lobby(lobbyId, this.server, maxClients);
 
     // human-readable lobby id to connect to

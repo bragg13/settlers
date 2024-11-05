@@ -4,5 +4,5 @@ export enum ClientEvents {
   LobbyLeave = 'client.lobbyleave',
 
   // chat
-  // ...
+  ChatMessage = 'client.chatMessage',
 }

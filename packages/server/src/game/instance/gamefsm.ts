@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { ClientEvents, GameAction, State } from '@settlers/shared';
+import { GameAction, State } from '@settlers/shared';
 
 export class GameFSM {
   private state: State = 'SETUP';
@@ -26,12 +26,37 @@ export class GameFSM {
     GAME_END: [],
   };
 
+  public setupSteps: number[];
+
   public getState(): State {
     return this.state;
   }
 
+  public getActionsForSetup(currentPlayerIndex: number): GameAction[] {
+    switch (this.setupSteps[currentPlayerIndex]) {
+      case 0:
+        // game just started
+        return [GameAction.ActionSetupSettlement];
+      case 1:
+        // just placed a settlement
+        return [GameAction.ActionSetupRoad];
+      case 2:
+        // placed one settlement and one road
+        return [GameAction.ActionSetupSettlement];
+      case 3:
+        // just missing one final road
+        return [GameAction.ActionSetupRoad];
+      default:
+        return [];
+    }
+  }
+
   // retrieve available actions for the current state
-  public getAvailableActions(): GameAction[] {
+  public getAvailableActions(currentPlayerIndex: number): GameAction[] {
+    if (this.state === 'SETUP') {
+      return this.getActionsForSetup(currentPlayerIndex);
+    }
+
     return this.validActions[this.state];
   }
 
@@ -44,25 +69,4 @@ export class GameFSM {
       Logger.error(`Invalid transition from ${this.state} to ${state}`);
     }
   }
-
-  // handle action from clientClientPayloads[ClientEvents.ActionSetupSettlement]
-  // public handleAction<T extends keyof ClientPayloads>(
-  //   action: T,
-  //   payload: ClientPayloads[T]
-  // ): void {
-  //   switch (this.state) {
-  //     case 'SETUP':
-  //       if (action == ClientEvents.ActionSetupSettlement) {
-  //         return true
-  //       } else if (action == ClientEvents.ActionSetupRoad) {
-  //       } else {
-  //         Logger.error(`Invalid action ${action} in state ${this.state}`);
-  //       }
-  //       break;
-  //     case 'DICE_ROLL':
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
 }

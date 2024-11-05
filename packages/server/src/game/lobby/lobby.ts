@@ -3,6 +3,7 @@ import { AuthenticatedSocket } from '../types';
 import { Instance } from '../instance/instance';
 import { Logger } from '@nestjs/common';
 import { ServerPayloads, ServerEvents } from '@settlers/shared';
+import { Chat } from '../instance/chat';
 
 /**
  * Class representing a matchmaking lobby
@@ -19,6 +20,7 @@ export class Lobby {
   >();
 
   public readonly instance: Instance = new Instance(this);
+  public chat: Chat = new Chat(this);
 
   constructor(
     public readonly id: string,
@@ -47,7 +49,7 @@ export class Lobby {
       Logger.log(`Lobby ${this.id} is full, starting game...`);
       this.instance.triggerStartGame();
     }
-    n;
+
     this.dispatchLobbyState();
   }
 
@@ -85,6 +87,6 @@ export class Lobby {
   }
 
   public dispatchToCurrentPlayer<T>(event: string, data: T): void {
-    this.clients.get(this.instance.getCurrentPlayer()).emit(event, data);
+    this.clients.get(this.instance.turns.getCurrentPlayer()).emit(event, data);
   }
 }

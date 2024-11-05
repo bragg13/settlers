@@ -1,4 +1,10 @@
+import { Button, Stack, TextField } from '@mui/material';
+import { useSocketManager } from '../hooks/useSocketManager';
+import { ClientEvents, GameAction } from '@settlers/shared';
+import { useState } from 'react';
+
 const PlayPage = () => {
+  const [msg, setMsg] = useState('');
   // const world = useRef(null);
   // const location = useLocation();
   // const [loaded, setLoaded] = useState(false);
@@ -96,10 +102,73 @@ const PlayPage = () => {
   // const handlePassTurn = () => {
   //   world.current.handlePassTurn();
   // };
+  const sm = useSocketManager();
 
   return (
-    <div id="container">
-      <canvas id="three-js-canvas" />
+    <Stack direction="row" gap={4}>
+      <Button
+        id="buildSettlment"
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          sm.emit({
+            event: GameAction.ActionSetupSettlement,
+            data: {
+              spotId: 1,
+            },
+          });
+        }}
+      >
+        build settlement
+      </Button>
+
+      <Button
+        id="buildRoad"
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          sm.emit({ event: GameAction.ActionSetupRoad, data: { roadId: 6 } });
+        }}
+      >
+        build road
+      </Button>
+      <Button
+        id="rollDice"
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          sm.emit({ event: GameAction.ActionDiceRoll, data: {} });
+        }}
+      >
+        roll dice
+      </Button>
+      <Stack>
+        <TextField
+          variant="standard"
+          margin="normal"
+          id="msg"
+          label="message"
+          name="msg"
+          value={msg}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            e.preventDefault();
+            setMsg(e.target.value);
+          }}
+        />
+        <Button
+          id="chat"
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            sm.emit({
+              event: ClientEvents.ChatMessage,
+              data: { text: msg },
+            });
+          }}
+        >
+          chat
+        </Button>
+      </Stack>
       {/* <MainContainer
         handleCrafting={handleCrafting}
         handleDiceRoll={handleDiceRoll}
@@ -117,7 +186,7 @@ const PlayPage = () => {
         }
         turn={turn}
       /> */}
-    </div>
+    </Stack>
   );
 };
 

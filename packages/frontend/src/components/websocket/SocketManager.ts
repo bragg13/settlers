@@ -4,12 +4,13 @@ import {
   ServerEvents,
   ServerExceptionResponse,
   ClientEvents,
+  GameAction,
 } from '@settlers/shared';
 import { io, Socket } from 'socket.io-client';
 import { showNotification } from '@mantine/notifications';
 
 type EmitOptions<T> = {
-  event: ClientEvents;
+  event: ClientEvents | GameAction;
   data?: T;
 };
 
