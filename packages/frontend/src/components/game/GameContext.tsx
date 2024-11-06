@@ -9,16 +9,20 @@ export const GameContextProvider = ({ children }: { children: ReactNode }) => {
     ServerPayloads[ServerEvents.LobbyState]
   >({
     lobbyId: '',
+    currentPlayer: '',
+    currentRound: 0,
     hasStarted: false,
     hasEnded: false,
     players: [],
   });
 
-  const [gameState, setGameState] = useState<
-    ServerPayloads[ServerEvents.GameState]
+  const [availableActions, setAvailableActions] = useState<
+    ServerPayloads[ServerEvents.AvailableActions]
   >({
-    currentPlayer: '',
-    currentRound: 0,
+    availableActions: [],
+    buildableCities: null,
+    buildableRoads: null,
+    buildableSpots: null,
   });
 
   const [playerInformation, setPlayerInformation] = useState<Player>({
@@ -32,8 +36,8 @@ export const GameContextProvider = ({ children }: { children: ReactNode }) => {
       value={{
         lobbyState,
         setLobbyState,
-        gameState,
-        setGameState,
+        availableActions,
+        setAvailableActions,
         setPlayerInformation,
         playerInformation,
       }}
@@ -54,14 +58,14 @@ export const useLobbyState = () => {
   };
 };
 
-export const useGameState = () => {
+export const useAvailableActions = () => {
   const context = useContext(GameContext);
   if (!context) {
     throw new Error('useGameContext must be used within a GameContextProvider');
   }
   return {
-    gameState: context.gameState,
-    setGameState: context.setGameState,
+    availableActions: context.availableActions,
+    setAvailableActions: context.setAvailableActions,
   };
 };
 

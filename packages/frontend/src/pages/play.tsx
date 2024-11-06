@@ -1,115 +1,40 @@
 import { Button, Stack, TextField, Typography } from '@mui/material';
 import { useSocketManager } from '../hooks/useSocketManager';
-import { ClientEvents, GameAction } from '@settlers/shared';
-import { useState } from 'react';
 import {
-  useGameState,
+  ClientEvents,
+  GameAction,
+  ServerEvents,
+  ServerPayloads,
+} from '@settlers/shared';
+import { useEffect, useState } from 'react';
+import {
+  useLobbyState,
   usePlayerInformation,
 } from '../components/game/GameContext';
 
 const PlayPage = () => {
   const [msg, setMsg] = useState('');
-  const { gameState } = useGameState();
   const { playerInformation } = usePlayerInformation();
-  // const world = useRef(null);
-  // const location = useLocation();
-  // const [loaded, setLoaded] = useState(false);
-  // const [players, setPlayers] = useState([]);
-  // const [currentPlayer, setCurrentPlayer] = useState(null);
-  // const [turn, setTurn] = useState(null);
-  // const [availableActions, setAvailableActions] = useState([]);
-
-  // useEffect(() => {
-  //   const initialGameState = location.state.initialGameState;
-
-  //   // initialize the world
-  //   world.current = new World("three-js-canvas", socket);
-  //   world.current.initialize(initialGameState);
-
-  //   // I NEED TO USE A REDUCER HERE
-
-  //   // initialize the GUI
-  //   setPlayers(initialGameState.players);
-  //   setTurn(initialGameState.turn);
-  //   setCurrentPlayer(initialGameState.players[socket.id]);
-  //   setLoaded(true);
-  // }, [location.state.initialGameState, socket]);
-
-  // // listen to server updates
-  // useEffect(() => {
-  //   if (loaded) {
-  //     socket.on("earlyGameUpdate", (updateData) => processEarlyGameUpdate(updateData));
-  //     socket.on("gameUpdate", (updateData) => processGameUpdate(updateData));
-  //   }
-  // }, [socket, loaded]);
-
-  // const processEarlyGameUpdate = (gameUpdate) => {
-  //   // update the board
-  //   world.current.updateScene([...gameUpdate.updatedBoard]);
-
-  //   // update the GUI - TODO: might just use setState
-  //   setTurn(gameUpdate.turn);
-  //   setPlayers((prevPlayers) => {
-  //     return { ...prevPlayers, ...gameUpdate.players };
-  //   });
-  //   setCurrentPlayer((prevPlayer) => {
-  //     return {
-  //       ...prevPlayer, ...gameUpdate.players[socket.id],  };
-  //   });
-
-  //   // play the turn (if it is mine)
-  //   if (gameUpdate.turn.player === socket.id && gameUpdate.turn.round !== 0) {
-  //     world.current.handleEarlyGame(currentPlayer, { ...gameUpdate });
-  //   }
-  // };
-
-  // const processGameUpdate = (gameUpdate) => {
-  //   console.log('gameUpdate', gameUpdate);
-
-  //   // update the board
-  //   world.current.updateScene([...gameUpdate.updatedBoard]);
-
-  //   // update the GUI - TODO: might just use setState
-  //   setTurn(gameUpdate.turn);
-  //   setPlayers((prevPlayers) => {
-  //     return { ...prevPlayers, ...gameUpdate.players };
-  //   });
-  //   setCurrentPlayer((prevPlayer) => {
-  //     return {
-  //       ...prevPlayer,
-  //       ...gameUpdate.players[socket.id],
-  //       playing: (gameUpdate.turn.player === socket.id),
-  //       inventory: {
-  //         ...gameUpdate.players[socket.id].inventory,
-  //       },
-  //     };
-  //   });
-  //   setAvailableActions((prevActions) => {
-  //     return {...prevActions, ...gameUpdate.availableActions};
-  //   });
-
-  //   console.log("currentPlayer", currentPlayer);
-
-  //   // play the turn (if it is mine)
-  //   if (gameUpdate.turn.player === socket.id) {
-  //     world.current.handleGame(currentPlayer, { ...gameUpdate });
-  //   }
-  // };
-
-  // const handleCrafting = () => {
-  //   world.current.handleCrafting();
-  // };
-
-  // const handleDiceRoll = (value1, value2) => {
-  //   // send values to server
-  //   world.current.handleDiceRoll(value1, value2);
-  // };
-
-  // const handlePassTurn = () => {
-  //   world.current.handlePassTurn();
-  // };
+  const { lobbyState } = useLobbyState();
   const sm = useSocketManager();
-  const isPlaying = playerInformation.socketId === gameState.currentPlayer;
+  const isPlaying = playerInformation.socketId === lobbyState.currentPlayer;
+
+  useEffect(() => {
+    const onDeltaUpdate = (data: ServerPayloads[ServerEvents.DeltaUpdate]) => {
+      for (const update of data) {
+        console.log(
+          `player ${update.player} has performed action ${update.action}`
+        );
+      }
+    };
+
+    sm.registerListener(ServerEvents.DeltaUpdate, onDeltaUpdate);
+
+    return () => {
+      sm.removeListener(ServerEvents.DeltaUpdate, onDeltaUpdate);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Stack direction="row" gap={4}>

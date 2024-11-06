@@ -33,27 +33,33 @@ export class Instance {
 
   // send available actions to the current player
   public dispatchAvailableActions(): void {
-    const currentPlayerIndex = this.turns.getCurrentPlayerIndex()
-    const currentPlayer = this.turns.getCurrentPlayer()
-    const availableActions = this.fsm.getAvailableActions(currentPlayerIndex)
+    const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
+    const currentPlayer = this.turns.getCurrentPlayer();
+    const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
 
     const actions: ServerPayloads[ServerEvents.AvailableActions] = {
       availableActions,
-      buildableSpots: availableActions.includes(GameAction.ActionSetupSettlement) || availableActions.includes(GameAction.ActionBuildSettlement) ? this.board.getAvailableSpots(currentPlayer) : null,
-      buildableRoads: availableActions.includes(GameAction.ActionSetupRoad) || availableActions.includes(GameAction.ActionBuildRoad) ? this.board.getAvailableRoads(currentPlayer) : null,
-      buildableCities: null
+      buildableSpots:
+        availableActions.includes(GameAction.ActionSetupSettlement) ||
+        availableActions.includes(GameAction.ActionBuildSettlement)
+          ? this.board.getAvailableSpots(currentPlayer)
+          : null,
+      buildableRoads:
+        availableActions.includes(GameAction.ActionSetupRoad) ||
+        availableActions.includes(GameAction.ActionBuildRoad)
+          ? this.board.getAvailableRoads(currentPlayer)
+          : null,
+      buildableCities: null,
     };
-    this.lobby.dispatchToCurrentPlayer(
-      ServerEvents.AvailableActions,
-      actions
-    );
+    this.lobby.dispatchToCurrentPlayer(ServerEvents.AvailableActions, actions);
   }
 
   // dispatch updates to all clients
   // questo va chiamato spesso all'interno di un singolo turnO
   public dispatchDeltaUpdate(): void {
-    const updates: ServerPayloads[ServerEvents.DeltaUpdate] = this.board.getDeltaUpdates()
-      this.lobby.dispatchToLobby(ServerEvents.DeltaUpdate, updates);
+    const updates: ServerPayloads[ServerEvents.DeltaUpdate] =
+      this.board.getDeltaUpdates();
+    this.lobby.dispatchToLobby(ServerEvents.DeltaUpdate, updates);
   }
 
   /**
@@ -114,9 +120,8 @@ export class Instance {
     // check that the action is legit from this state
     if (availableActions.includes(GameAction.ActionSetupRoad)) {
       this.board.buildRoad(data.spot1, data.spot2, client.id);
-      Logger.log('building settlement');
       this.fsm.setupSteps[currentPlayerIndex]++;
-      console.log(this.fsm.setupSteps[currentPlayerIndex]++);
+      this.turns.nextTurn();
       this.dispatchAvailableActions();
       this.dispatchDeltaUpdate();
     } else {
@@ -135,7 +140,8 @@ export class Instance {
     // check that the action is legit from this state
     if (availableActions.includes(GameAction.ActionEndTurn)) {
       // this.fsm.transitionTo(state) // to dice roll?
-      this.turns.nextTurn()
+      this.turns.nextTurn();
+    }
   }
 }
 

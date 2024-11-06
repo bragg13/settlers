@@ -2,6 +2,7 @@ import * as road_connections from './utils/road_connections.json';
 import * as board_constants from './utils/board_constants.json';
 import { Logger } from '@nestjs/common';
 import {
+  Delta,
   GameAction,
   Resource,
   Road,
@@ -12,7 +13,6 @@ import {
   Tile,
 } from '@settlers/shared';
 import { Socket } from 'socket.io';
-import { Delta } from './delta';
 import { randomInt } from 'crypto';
 
 export class MapBoard {
@@ -57,7 +57,11 @@ export class MapBoard {
       owner: null,
     };
   }
-  public getDeltaUpdates(): ServerPayloads[ServerEvents.DeltaUpdate] {}
+  public getDeltaUpdates(): ServerPayloads[ServerEvents.DeltaUpdate] {
+    const deltas = [...this.deltas];
+    this.deltas = [];
+    return deltas;
+  }
 
   public initBoard(): void {
     // initialise the 'graph' part of the board aka spots/roads
@@ -142,6 +146,7 @@ export class MapBoard {
     spot2: Spot['id'],
     player: Socket['id']
   ): void {
+    console.log(this.roads[spot1][spot2]);
     this.roads[spot1][spot2].owner = player;
     this.roads[spot2][spot1].owner = player;
 

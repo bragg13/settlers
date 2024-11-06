@@ -20,6 +20,7 @@ import {
   Road,
   Spot,
   Tile,
+  Delta,
 } from './common/BoardTypes';
 
 import { State } from './common/GameStates';
@@ -45,4 +46,5 @@ export {
   type Tile,
   type State,
   GameAction,
+  type Delta,
 };

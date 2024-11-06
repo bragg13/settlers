@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { useSocketManager } from '../hooks/useSocketManager';
 import { ServerEvents, ServerPayloads } from '@settlers/shared';
 import PlayPage from '../pages/play';
 import LobbyPage from '../pages/lobby';
 import { showNotification } from '@mantine/notifications';
 import {
-  useGameState,
+  useAvailableActions,
   useLobbyState,
   usePlayerInformation,
 } from './game/GameContext';
@@ -13,7 +13,7 @@ import {
 const GameManager = () => {
   const sm = useSocketManager();
   const { lobbyState, setLobbyState } = useLobbyState();
-  const { gameState, setGameState } = useGameState();
+  const { availableActions, setAvailableActions } = useAvailableActions();
   const { playerInformation } = usePlayerInformation();
 
   useEffect(() => {
@@ -32,19 +32,11 @@ const GameManager = () => {
       setLobbyState(data);
     };
 
-    const onGameState = (data: ServerPayloads[ServerEvents.GameState]) => {
-      console.log('game state', data);
-      setGameState(data);
-    };
-
     const onAvailableActions = (
       data: ServerPayloads[ServerEvents.AvailableActions]
     ) => {
       console.log('available actions', data);
-      setGameState((prevState) => ({
-        ...prevState,
-        availableActions: { ...data },
-      }));
+      setAvailableActions(data);
     };
 
     const onChatMessage = (data: ServerPayloads[ServerEvents.ChatMessage]) => {
@@ -53,7 +45,6 @@ const GameManager = () => {
 
     sm.registerListener(ServerEvents.GameMessage, onGameMessage);
     sm.registerListener(ServerEvents.LobbyState, onLobbyState);
-    sm.registerListener(ServerEvents.GameState, onGameState);
     sm.registerListener(ServerEvents.AvailableActions, onAvailableActions);
     sm.registerListener(ServerEvents.ChatMessage, onChatMessage);
 
@@ -61,7 +52,6 @@ const GameManager = () => {
     return () => {
       sm.removeListener(ServerEvents.GameMessage, onGameMessage);
       sm.removeListener(ServerEvents.LobbyState, onLobbyState);
-      sm.removeListener(ServerEvents.GameState, onGameState);
       sm.removeListener(ServerEvents.AvailableActions, onAvailableActions);
       sm.removeListener(ServerEvents.ChatMessage, onChatMessage);
     };

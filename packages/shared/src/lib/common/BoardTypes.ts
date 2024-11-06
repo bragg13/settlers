@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { Player } from '../shared';
+import { GameAction, Player } from '../shared';
 
 // settlement
 export type SettlementType = 'city' | 'village' | null;
@@ -25,3 +25,10 @@ export type Tile = {
 };
 
 export type Resource = 'WOOD' | 'BRICK' | 'SHEEP' | 'WHEAT' | 'ORE' | 'ROBBERS';
+
+export type Delta = {
+  action: GameAction;
+  player: Socket['id'];
+  details: unknown;
+  timestamp: number;
+};
