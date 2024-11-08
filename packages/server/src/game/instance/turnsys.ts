@@ -22,7 +22,7 @@ export class TurnSystem {
 
   public nextTurn(): void {
     this.currentPlayerIndex++;
-    if (this.currentPlayerIndex >= 4) {
+    if (this.currentPlayerIndex >= this.lobby.maxClients) {
       this.currentPlayerIndex = 0;
     }
     this.currentRound++;
