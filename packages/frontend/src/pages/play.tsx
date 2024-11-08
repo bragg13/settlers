@@ -17,7 +17,7 @@ const PlayPage = () => {
   const { playerInformation } = usePlayerInformation();
   const { lobbyState } = useLobbyState();
   const sm = useSocketManager();
-  const isPlaying = playerInformation.socketId === lobbyState.currentPlayer;
+  const isPlaying = sm.getSocketId() === lobbyState.currentPlayer;
 
   useEffect(() => {
     const onDeltaUpdate = (data: ServerPayloads[ServerEvents.DeltaUpdate]) => {
@@ -66,7 +66,7 @@ const PlayPage = () => {
         onClick={() => {
           sm.emit({
             event: GameAction.ActionSetupRoad,
-            data: { spot1: 6, spot2: 4, roadId: 3 },
+            data: { spot1: 1, spot2: 5, roadId: 2 },
           });
         }}
       >

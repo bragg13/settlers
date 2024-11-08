@@ -14,15 +14,17 @@ import {
 } from '@settlers/shared';
 import { Socket } from 'socket.io';
 import { randomInt } from 'crypto';
+import { bfs_roads, bfs_spots } from './utils/bfs';
 
 export class MapBoard {
   private NUM_SPOTS = 54;
   private NUM_TILES = 19;
   public spots: Map<Spot['id'], Spot> = new Map<Spot['id'], Spot>();
   public tiles: Map<Tile['id'], Tile> = new Map<Tile['id'], Tile>();
+  public roads: Map<Road['id'], Road> = new Map<Road['id'], Road>();
   deltas: Delta[] = [];
 
-  public roads: {
+  public roadsGraph: {
     [from: Spot['id']]: {
       [to: Spot['id']]: Road;
     };
@@ -30,7 +32,7 @@ export class MapBoard {
 
   constructor() {
     for (let i = 1; i <= this.NUM_SPOTS; i++) {
-      this.roads[i] = {};
+      this.roadsGraph[i] = {};
     }
   }
 
@@ -43,19 +45,29 @@ export class MapBoard {
     });
   }
 
-  public initRoad(road_id: number, spot1: Spot['id'], spot2: Spot['id']): void {
-    this.roads[spot1][spot2] = {
+  public initRoad(
+    road_id: Road['id'],
+    spot1: Spot['id'],
+    spot2: Spot['id']
+  ): void {
+    this.roadsGraph[spot1][spot2] = {
       from: spot1,
       to: spot2,
       id: road_id,
       owner: null,
     };
-    this.roads[spot2][spot1] = {
+    this.roadsGraph[spot2][spot1] = {
       from: spot2,
       to: spot1,
       id: road_id,
       owner: null,
     };
+    this.roads.set(road_id, {
+      from: spot1,
+      to: spot2,
+      id: road_id,
+      owner: null,
+    });
   }
   public getDeltaUpdates(): ServerPayloads[ServerEvents.DeltaUpdate] {
     const deltas = [...this.deltas];
@@ -98,19 +110,36 @@ export class MapBoard {
   }
 
   public getAdjacentSpots(spot_id: Spot['id']): Array<Spot['id']> {
-    const r = Object.keys(this.roads[spot_id]);
-    console.log(r);
+    const r = Object.keys(this.roadsGraph[spot_id]);
     return [];
   }
 
   // building roads and settlements
   public getAvailableSpots = (player: Socket['id']): Array<Spot> => {
-    const spot: Spot = { id: 1, owner: null, settlementType: null };
-    return [spot];
+    const settlementsBuiltByPlayer = this.getSettlementsBuiltBy(player);
+    if (settlementsBuiltByPlayer.length < 2) {
+      return this.getSettlementsBuiltBy(null);
+    }
+    return bfs_spots(settlementsBuiltByPlayer, this.spots, this.roads, player);
   };
+
   public getAvailableRoads = (player: Socket['id']): Array<Road> => {
-    const road: Road = { from: 0, to: 1, id: 0, owner: null };
-    return [road];
+    const settlementsBuiltByPlayer = this.getSettlementsBuiltBy(player);
+    return bfs_roads(
+      settlementsBuiltByPlayer,
+      this.spots,
+      this.roadsGraph,
+      player
+    );
+  };
+
+  // there is for sure a better way
+  public getSettlementsBuiltBy = (player: Socket['id'] | null): Array<Spot> => {
+    const playerTowns = [];
+    for (const [, spot] of this.spots.entries()) {
+      if (spot.owner === player) playerTowns.push(spot);
+    }
+    return playerTowns;
   };
 
   public buildSettlement(
@@ -146,15 +175,24 @@ export class MapBoard {
     spot2: Spot['id'],
     player: Socket['id']
   ): void {
-    console.log(this.roads[spot1][spot2]);
-    this.roads[spot1][spot2].owner = player;
-    this.roads[spot2][spot1].owner = player;
+    console.log(this.roadsGraph);
+    this.roadsGraph[spot1][spot2].owner = player;
+    this.roadsGraph[spot2][spot1].owner = player;
 
+    const roadId = this.roadsGraph[spot2][spot1].id;
+    this.roads.set(roadId, {
+      from: spot1,
+      to: spot2,
+      id: roadId,
+      owner: null,
+    });
+
+    console.log(`built: ${this.roadsGraph[spot1][spot2]}`);
     this.deltas.push({
       action: GameAction.ActionBuildRoad,
       player,
       details: {
-        newRoad: this.roads[spot1][spot2],
+        newRoad: this.roadsGraph[spot1][spot2],
       },
       timestamp: Date.now(),
     });

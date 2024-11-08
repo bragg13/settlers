@@ -73,8 +73,12 @@ export class Lobby {
       lobbyId: this.id,
       hasStarted: this.instance.hasStarted,
       hasEnded: this.instance.hasEnded,
-      currentPlayer: this.instance.turns.getCurrentPlayer(),
-      currentRound: this.instance.turns.getCurrentRound(),
+      currentPlayer: this.instance.turns
+        ? this.instance.turns.getCurrentPlayer()
+        : null,
+      currentRound: this.instance.turns
+        ? this.instance.turns.getCurrentRound()
+        : null,
       players: Array.from(this.clients.values()).map((client) => ({
         username: client.data.username,
         color: client.data.color,

@@ -3,7 +3,6 @@ import {
   GameAction,
   ServerEvents,
   ServerPayloads,
-  State,
 } from '@settlers/shared';
 import { Lobby } from '../lobby/lobby';
 import { AuthenticatedSocket } from '../types';
