@@ -11,9 +11,9 @@ import {
   useLobbyState,
   usePlayerInformation,
 } from '../components/game/GameContext';
+import Chat from '../components/ui/chat';
 
 const PlayPage = () => {
-  const [msg, setMsg] = useState('');
   const { playerInformation } = usePlayerInformation();
   const { lobbyState } = useLobbyState();
   const sm = useSocketManager();
@@ -37,97 +37,56 @@ const PlayPage = () => {
   }, []);
 
   return (
-    <Stack direction="row" gap={4}>
-      <Typography sx={{ backgroundColor: playerInformation.color }}>
-        {playerInformation.username}
-      </Typography>
-      <Button
-        id="buildSettelment"
-        variant="contained"
-        color="primary"
-        disabled={!isPlaying}
-        onClick={() => {
-          sm.emit({
-            event: GameAction.ActionSetupSettlement,
-            data: {
-              spotId: 1,
-            },
-          });
-        }}
-      >
-        build settlement
-      </Button>
-
-      <Button
-        id="buildRoad"
-        disabled={!isPlaying}
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          sm.emit({
-            event: GameAction.ActionSetupRoad,
-            data: { spot1: 1, spot2: 5, roadId: 2 },
-          });
-        }}
-      >
-        build road
-      </Button>
-      <Button
-        id="rollDice"
-        variant="contained"
-        color="primary"
-        disabled={!isPlaying}
-        onClick={() => {
-          sm.emit({ event: GameAction.ActionDiceRoll, data: {} });
-        }}
-      >
-        roll dice
-      </Button>
-      <Stack>
-        <TextField
-          variant="standard"
-          margin="normal"
-          id="msg"
-          label="message"
-          name="msg"
-          value={msg}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            e.preventDefault();
-            setMsg(e.target.value);
-          }}
-        />
+    <>
+      <Stack direction="row" gap={4}>
+        <Typography sx={{ backgroundColor: playerInformation.color }}>
+          {playerInformation.username}
+        </Typography>
         <Button
-          id="chat"
+          id="buildSettelment"
+          variant="contained"
+          color="primary"
+          disabled={!isPlaying}
+          onClick={() => {
+            sm.emit({
+              event: GameAction.ActionSetupSettlement,
+              data: {
+                spotId: 1,
+              },
+            });
+          }}
+        >
+          build settlement
+        </Button>
+
+        <Button
+          id="buildRoad"
+          disabled={!isPlaying}
           variant="contained"
           color="primary"
           onClick={() => {
             sm.emit({
-              event: ClientEvents.ChatMessage,
-              data: { text: msg },
+              event: GameAction.ActionSetupRoad,
+              data: { spot1: 1, spot2: 5, roadId: 2 },
             });
           }}
         >
-          chat
+          build road
+        </Button>
+        <Button
+          id="rollDice"
+          variant="contained"
+          color="primary"
+          disabled={!isPlaying}
+          onClick={() => {
+            sm.emit({ event: GameAction.ActionDiceRoll, data: {} });
+          }}
+        >
+          roll dice
         </Button>
       </Stack>
-      {/* <MainContainer
-        handleCrafting={handleCrafting}
-        handleDiceRoll={handleDiceRoll}
-        handlePassTurn={handlePassTurn}
-        players={players}
-        currentPlayer={
-          availableActions !== undefined
-            ? {
-                ...currentPlayer,
-                availableActions: availableActions,
-              }
-            : {
-                ...currentPlayer,
-              }
-        }
-        turn={turn}
-      /> */}
-    </Stack>
+      <Chat />
+    </>
   );
 };
 

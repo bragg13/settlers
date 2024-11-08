@@ -39,21 +39,15 @@ const GameManager = () => {
       setAvailableActions(data);
     };
 
-    const onChatMessage = (data: ServerPayloads[ServerEvents.ChatMessage]) => {
-      console.log(`[chat] ${data.username} says: ${data.text}`);
-    };
-
     sm.registerListener(ServerEvents.GameMessage, onGameMessage);
     sm.registerListener(ServerEvents.LobbyState, onLobbyState);
     sm.registerListener(ServerEvents.AvailableActions, onAvailableActions);
-    sm.registerListener(ServerEvents.ChatMessage, onChatMessage);
 
     // remove listeners when dismounting
     return () => {
       sm.removeListener(ServerEvents.GameMessage, onGameMessage);
       sm.removeListener(ServerEvents.LobbyState, onLobbyState);
       sm.removeListener(ServerEvents.AvailableActions, onAvailableActions);
-      sm.removeListener(ServerEvents.ChatMessage, onChatMessage);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

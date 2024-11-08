@@ -22,6 +22,7 @@ export class LobbyManager {
 
   public terminateSocket(client: AuthenticatedSocket): void {
     client.data.lobby?.removeClient(client);
+    delete client;
   }
 
   public createLobby(lobbyId: string): Lobby {

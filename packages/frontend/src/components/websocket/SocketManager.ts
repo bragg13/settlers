@@ -24,7 +24,9 @@ export default class SocketManager {
 
   constructor() {
     // this.socket = io(process.env.PUBLIC_SOCKET_ENDPOINT as string, {
-    this.socket = io('http://localhost:3000');
+    this.socket = io('http://localhost:3000', {
+      transports: ['websocket'],
+    });
     this.socketStateDispatch = () => {}; // will be set in SocketManagerProvider
     this.socketState = socketInitialState;
 
