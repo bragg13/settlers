@@ -79,6 +79,19 @@ export class Instance {
     this.dispatchAvailableActions();
   }
 
+  public triggerFinish(): void {
+    if (!this.hasStarted) {
+      return;
+    }
+
+    this.lobby.dispatchToLobby<ServerPayloads[ServerEvents.GameMessage]>(
+      ServerEvents.GameMessage,
+      {
+        color: 'blue',
+        message: 'Game finished !',
+      }
+    );
+  }
   public triggerPlayerDisconnect(client: AuthenticatedSocket): void {
     this.lobby.dispatchToLobby<ServerPayloads[ServerEvents.GameMessage]>(
       ServerEvents.GameMessage,

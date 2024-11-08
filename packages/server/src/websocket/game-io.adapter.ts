@@ -7,7 +7,6 @@ export class GameIoAdapter extends IoAdapter {
     cors: {
       origin: process.env.CORS_ALLOW_ORIGIN,
     },
-    path: '/wsapi',
     transports: ['websocket'],
     serveClient: false,
     maxSocketListeners: 35,
