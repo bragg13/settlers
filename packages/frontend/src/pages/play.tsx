@@ -8,6 +8,7 @@ import {
 } from '@settlers/shared';
 import { useEffect, useState } from 'react';
 import {
+  useAvailableActions,
   useLobbyState,
   usePlayerInformation,
 } from '../components/game/GameContext';
@@ -16,6 +17,7 @@ import Chat from '../components/ui/chat';
 const PlayPage = () => {
   const { playerInformation } = usePlayerInformation();
   const { lobbyState } = useLobbyState();
+  const { availableActions } = useAvailableActions();
   const sm = useSocketManager();
   const isPlaying = sm.getSocketId() === lobbyState.currentPlayer;
 
@@ -46,7 +48,12 @@ const PlayPage = () => {
           id="buildSettelment"
           variant="contained"
           color="primary"
-          disabled={!isPlaying}
+          disabled={
+            !isPlaying ||
+            !availableActions.availableActions.includes(
+              GameAction.ActionSetupSettlement
+            )
+          }
           onClick={() => {
             sm.emit({
               event: GameAction.ActionSetupSettlement,
@@ -61,7 +68,12 @@ const PlayPage = () => {
 
         <Button
           id="buildRoad"
-          disabled={!isPlaying}
+          disabled={
+            !isPlaying ||
+            !availableActions.availableActions.includes(
+              GameAction.ActionSetupRoad
+            )
+          }
           variant="contained"
           color="primary"
           onClick={() => {
@@ -77,7 +89,12 @@ const PlayPage = () => {
           id="rollDice"
           variant="contained"
           color="primary"
-          disabled={!isPlaying}
+          disabled={
+            !isPlaying ||
+            !availableActions.availableActions.includes(
+              GameAction.ActionDiceRoll
+            )
+          }
           onClick={() => {
             sm.emit({ event: GameAction.ActionDiceRoll, data: {} });
           }}
@@ -85,7 +102,7 @@ const PlayPage = () => {
           roll dice
         </Button>
       </Stack>
-      <Chat />
+      {/* <Chat /> */}
     </>
   );
 };

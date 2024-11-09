@@ -134,6 +134,10 @@ export class Instance {
       this.board.buildRoad(data.spot1, data.spot2, client.id);
       this.fsm.setupSteps[currentPlayerIndex]++;
       this.turns.nextTurn();
+      if (this.turns.getCurrentRound() === this.lobby.maxClients * 2) {
+        // end of setup stage
+        this.fsm.transitionTo('DICE_ROLL');
+      }
       this.dispatchAvailableActions();
       this.dispatchDeltaUpdate();
     } else {
@@ -155,10 +159,7 @@ export class Instance {
       this.turns.nextTurn();
     }
   }
-}
 
-// public getUsernameFromSocketId(socketId: Socket['id']): string {
-//   return Array.from(this.lobby.clients.values()).filter(
-//     (client) => client.id == socketId
-//   )[0].data.username;
-// }
+  // public onBuildRoad() { }
+  // public onBuildSettlement() { }
+}
