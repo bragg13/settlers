@@ -1,18 +1,16 @@
-import { Button, Stack, TextField, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 import { useSocketManager } from '../hooks/useSocketManager';
-import {
-  ClientEvents,
-  GameAction,
-  ServerEvents,
-  ServerPayloads,
-} from '@settlers/shared';
-import { useEffect, useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { GameAction, ServerEvents, ServerPayloads } from '@settlers/shared';
+import { useEffect } from 'react';
 import {
   useAvailableActions,
   useLobbyState,
   usePlayerInformation,
 } from '../components/game/GameContext';
 import Chat from '../components/ui/chat';
+import MainScene from '../components/game/MainScene';
+import { Stats, OrbitControls, Environment } from '@react-three/drei';
 
 const PlayPage = () => {
   const { playerInformation } = usePlayerInformation();
@@ -40,6 +38,19 @@ const PlayPage = () => {
 
   return (
     <>
+      <Canvas camera={{ position: [0, 0, 2] }}>
+        <Environment
+          files={'/winter_lake.hdr'}
+          background
+          backgroundBlurriness={0.2}
+        />
+        <MainScene />
+        <Stats />
+        <OrbitControls />
+        <axesHelper />
+        <gridHelper />
+      </Canvas>
+
       <Stack direction="row" gap={4}>
         <Typography sx={{ backgroundColor: playerInformation.color }}>
           {playerInformation.username}

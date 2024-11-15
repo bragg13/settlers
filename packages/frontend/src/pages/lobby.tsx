@@ -21,32 +21,32 @@ type PageState = 'login' | 'lobby';
 
 const LobbyPage = () => {
   // debug only - automactically join lobby
-  // const autoLogin = false;
-  // useEffect(() => {
-  //   if (autoLogin) {
-  //     setFormLobby((prev) => ({
-  //       ...prev,
-  //       color: 'green',
-  //       username: 'andrea',
-  //       lobbyId: '1234',
-  //     }));
-  //     sm.emit({
-  //       event: ClientEvents.LobbyJoin,
-  //       data: {
-  //         ...formLobby,
-  //       },
-  //     });
+  const autoLogin = true;
+  useEffect(() => {
+    if (autoLogin) {
+      setFormLobby((prev) => ({
+        ...prev,
+        color: 'green',
+        username: 'andrea',
+        lobbyId: '1234',
+      }));
+      sm.emit({
+        event: ClientEvents.LobbyJoin,
+        data: {
+          ...formLobby,
+        },
+      });
 
-  //     // save username and color info to socket state
-  //     sm.socketStateDispatch({
-  //       type: 'CONNECT',
-  //       payload: {
-  //         username: formLobby.username,
-  //         color: formLobby.color,
-  //       },
-  //     });
-  //   }
-  // }, []);
+      // save username and color info to socket state
+      sm.socketStateDispatch({
+        type: 'CONNECT',
+        payload: {
+          username: formLobby.username,
+          color: formLobby.color,
+        },
+      });
+    }
+  }, []);
 
   // lobby state and player list
   const [formLobby, setFormLobby] = useState<
