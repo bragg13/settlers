@@ -4,4 +4,5 @@ export enum ServerEvents {
   DeltaUpdate = 'server.deltaUpdate',
   AvailableActions = 'server.availableActions',
   ChatMessage = 'server.chatMessage',
+  BoardSetup = 'server.boardSetup',
 }

@@ -84,7 +84,12 @@ export class Lobby {
         color: client.data.color,
         socketId: client.id,
       })),
+      boardState: undefined,
     };
+
+    if (this.instance.hasStarted) {
+      data['boardState'] = { ...this.instance.getBoard() };
+    }
 
     this.dispatchToLobby(ServerEvents.LobbyState, data);
   }

@@ -19,31 +19,14 @@ const PlayPage = () => {
   const sm = useSocketManager();
   const isPlaying = sm.getSocketId() === lobbyState.currentPlayer;
 
-  useEffect(() => {
-    const onDeltaUpdate = (data: ServerPayloads[ServerEvents.DeltaUpdate]) => {
-      for (const update of data) {
-        console.log(
-          `player ${update.player} has performed action ${update.action}`
-        );
-      }
-    };
-
-    sm.registerListener(ServerEvents.DeltaUpdate, onDeltaUpdate);
-
-    return () => {
-      sm.removeListener(ServerEvents.DeltaUpdate, onDeltaUpdate);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <>
-      <Canvas camera={{ position: [0, 0, 2] }}>
-        <Environment
+      <Canvas camera={{ position: [0, 1, 2] }}>
+        {/* <Environment
           files={'/winter_lake.hdr'}
           background
           backgroundBlurriness={0.2}
-        />
+        /> */}
         <MainScene />
         <Stats />
         <OrbitControls />

@@ -1,8 +1,11 @@
 import {
   ClientPayloads,
   GameAction,
+  Road,
   ServerEvents,
   ServerPayloads,
+  Spot,
+  Tile,
 } from '@settlers/shared';
 import { Lobby } from '../lobby/lobby';
 import { AuthenticatedSocket } from '../types';
@@ -68,15 +71,26 @@ export class Instance {
   public triggerStartGame(): void {
     // start the game
     this.fsm.setupSteps = new Array(this.lobby.clients.size).fill(0);
-    this.hasStarted = true;
     this.turns = new TurnSystem(this.lobby);
 
     this.board.initBoard();
-
-    // send the board tiles somehow
+    this.hasStarted = true;
 
     // send available actions to the current player
     this.dispatchAvailableActions();
+  }
+
+  public getBoard(): {
+    spots: string;
+    tiles: string;
+    roads: string;
+  } {
+    const data = {
+      tiles: JSON.stringify(Object.fromEntries(this.board.tiles)),
+      spots: JSON.stringify(Object.fromEntries(this.board.spots)),
+      roads: JSON.stringify(Object.fromEntries(this.board.roads)),
+    };
+    return data;
   }
 
   public triggerFinish(): void {

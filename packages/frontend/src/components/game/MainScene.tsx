@@ -1,48 +1,49 @@
-import { useFrame, useLoader } from '@react-three/fiber';
 import { useControls } from 'leva';
-import { useRef } from 'react';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader';
-
-function Box(props) {
-  const ref = useRef();
-  useFrame((_, delta) => {
-    ref.current.rotation.x += 1 * delta;
-  });
-
-  return (
-    <mesh {...props} ref={ref}>
-      <boxGeometry />
-      <meshBasicMaterial color={0x00ff00} />
-    </mesh>
-  );
-}
+import Sheep from '../tiles/Sheep';
+import { useEffect } from 'react';
+import { useSocketManager } from '../../hooks/useSocketManager';
+import { Delta, ServerEvents, ServerPayloads } from '@settlers/shared';
+import Tiles from './Tiles';
 
 const MainScene = () => {
-  const sheepTileModel = useLoader(GLTFLoader, '/models/sheep.glb');
+  const sm = useSocketManager();
+
+  useEffect(() => {
+    const onDeltaUpdate = (data: ServerPayloads[ServerEvents.DeltaUpdate]) => {
+      for (const update of data) {
+        // TBI
+        console.log(
+          `player ${update.player} has performed action ${update.action}`
+        );
+        // applyDeltaUpdate(update);
+      }
+    };
+
+    sm.registerListener(ServerEvents.DeltaUpdate, onDeltaUpdate);
+
+    return () => {
+      sm.removeListener(ServerEvents.DeltaUpdate, onDeltaUpdate);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // leva controls
-  const tilePosition = useControls('SheepTile', {
-    x: { value: 0, min: -10, max: 10, step: 0.01 },
-    y: { value: 0, min: -10, max: 10, step: 0.01 },
-    z: { value: 0, min: -10, max: 10, step: 0.01 },
+  const directionalLight = useControls('directionalLight', {
+    x: { value: 10, min: -10, max: 10, step: 0.01 },
+    y: { value: 8, min: -10, max: 10, step: 0.01 },
+    z: { value: 8, min: -10, max: 10, step: 0.01 },
+    intensity: { value: 3.14, min: 0, max: 10, step: 0.01 },
   });
+
+  // add tile animation on turn pass, like every hexagon tile rotates 90 degrees tbi
 
   return (
     <>
-      <ambientLight intensity={Math.PI / 2} />
-      <spotLight
-        position={[10, 10, 10]}
-        angle={0.15}
-        penumbra={0.1}
-        decay={0}
-        intensity={Math.PI}
+      <directionalLight
+        position={[directionalLight.x, directionalLight.y, directionalLight.z]}
+        intensity={directionalLight.intensity}
       />
-      <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-      <primitive
-        object={sheepTileModel.scene}
-        position={[tilePosition.x, tilePosition.y, tilePosition.z]}
-        children-0-castShadow
-      />
+      <Tiles />
     </>
   );
 };

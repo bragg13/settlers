@@ -14,6 +14,7 @@ export const GameContextProvider = ({ children }: { children: ReactNode }) => {
     hasStarted: false,
     hasEnded: false,
     players: [],
+    boardState: undefined,
   });
 
   const [availableActions, setAvailableActions] = useState<
