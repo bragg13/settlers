@@ -27,6 +27,7 @@ const PlayPage = () => {
           background
           backgroundBlurriness={0.2}
         /> */}
+
         <MainScene />
         <Stats />
         <axesHelper />

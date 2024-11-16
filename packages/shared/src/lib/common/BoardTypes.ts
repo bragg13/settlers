@@ -8,9 +8,15 @@ export type Spot = {
   settlementType: SettlementType;
   owner: Socket['id'] | null;
   position: {
-    x: number;
-    y: number;
-    z: number;
+    screen: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    board: {
+      hex: number;
+      hexCorner: number;
+    };
   };
 };
 
@@ -34,9 +40,15 @@ export type Tile = {
   resource: Resource;
   value: number;
   position: {
-    x: number;
-    y: number;
-    z: number;
+    screen: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    board: {
+      q: number;
+      r: number;
+    };
   };
 };
 

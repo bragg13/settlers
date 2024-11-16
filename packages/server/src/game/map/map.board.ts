@@ -20,6 +20,9 @@ import { bfs_roads, bfs_spots } from './utils/bfs';
 export class MapBoard {
   private NUM_SPOTS = 54;
   private NUM_TILES = 19;
+  private Y_SPOT = 1;
+  private Y_TILE = 0;
+  private HEX_SIZE = 0.6;
   public spots: Map<Spot['id'], Spot> = new Map<Spot['id'], Spot>();
   public tiles: Map<Tile['id'], Tile> = new Map<Tile['id'], Tile>();
   public roads: Map<Road['id'], Road> = new Map<Road['id'], Road>();
@@ -38,12 +41,33 @@ export class MapBoard {
   }
 
   // initalise the graph
-  public initSpot(spot_id: Spot['id'], position: Spot['position']): void {
+  public initSpot(
+    spot_id: Spot['id'],
+    tilePositionBoard: Tile['position']['board'],
+    spotPositionBoard: Spot['position']['board']
+  ): void {
+    // get screen position of tile
+    const tileScreenPosition = this.tileBoardToScreen(tilePositionBoard);
+
+    // get spot position on screen
+    const spotTileCorner = spotPositionBoard.hexCorner;
+    const spotPositionScreen = this.spotBoardToScreen(
+      tileScreenPosition,
+      spotTileCorner
+    );
+
     this.spots.set(spot_id, {
       id: spot_id,
       owner: null,
       settlementType: null,
-      position: { ...position },
+      position: {
+        screen: {
+          ...spotPositionScreen,
+        },
+        board: {
+          ...spotPositionBoard,
+        },
+      },
     });
   }
 
@@ -81,16 +105,65 @@ export class MapBoard {
     return deltas;
   }
 
+  private spotBoardToScreen(
+    tileScreenPosition: Tile['position']['screen'],
+    tileCorner: number
+  ) {
+    const angle_deg = 60 * tileCorner - 30;
+    const angle_rad = (Math.PI / 180) * angle_deg;
+    const x = tileScreenPosition.x + this.HEX_SIZE * Math.cos(angle_rad);
+    const z = tileScreenPosition.z + this.HEX_SIZE * Math.sin(angle_rad);
+    return { x, y: this.Y_SPOT, z };
+  }
+
+  private tileBoardToScreen(boardPosition: Tile['position']['board']) {
+    const x =
+      this.HEX_SIZE *
+      (Math.sqrt(3) * boardPosition.q + (Math.sqrt(3) / 2) * boardPosition.r);
+    const z = this.HEX_SIZE * ((3 / 2) * boardPosition.r);
+    return { x, y: this.Y_TILE, z };
+  }
+
   public initBoard(): void {
     // initialise the 'graph' part of the board aka spots/roads
     const tilesCoordinates = board_coordinates['tiles'];
     const spotsCoordinates = board_coordinates['spots'];
     const roadsCoordinates = board_coordinates['roads'];
 
-    for (let spot = 1; spot <= this.NUM_SPOTS; spot++) {
-      const spotPosition = spotsCoordinates[spot.toString()];
-      this.initSpot(spot, spotPosition);
-      const from = spot.toString();
+    // tiles
+    const tileValues = board_constants['tileValues'].sort(
+      () => Math.random() - 0.5
+    );
+    const tileResources: Resource[] = board_constants['resourceValues'].sort(
+      () => Math.random() - 0.5
+    ) as Resource[];
+    let valueIndex = 0;
+
+    for (let i = 0; i < tileResources.length; i++) {
+      const tileValue =
+        tileResources[i] === 'ROBBERS' ? 7 : tileValues[valueIndex++];
+      const tilePositionBoard = tilesCoordinates[(i + 1).toString()];
+      const tilePositionScreen = this.tileBoardToScreen(tilePositionBoard);
+
+      this.tiles.set(i + 1, {
+        resource: tileResources[i],
+        value: tileValue,
+        id: i + 1,
+        position: {
+          board: tilePositionBoard,
+          screen: tilePositionScreen,
+        },
+      });
+    }
+
+    // spots and roads
+    for (let spotId = 1; spotId <= this.NUM_SPOTS; spotId++) {
+      const spotPositionBoard = spotsCoordinates[spotId.toString()];
+      const tilePositionBoard = this.tiles.get(spotPositionBoard.hex).position
+        .board;
+      this.initSpot(spotId, tilePositionBoard, spotPositionBoard);
+
+      const from = spotId.toString();
 
       for (const to of Object.keys(road_connections[from])) {
         // road = { 4: '1', 5: '2' }
@@ -104,28 +177,6 @@ export class MapBoard {
           roadPosition
         );
       }
-    }
-
-    // initialise the 'tiles' part of the board
-    const tileValues = board_constants['tileValues'].sort(
-      () => Math.random() - 0.5
-    );
-    const tileResources: Resource[] = board_constants['resourceValues'].sort(
-      () => Math.random() - 0.5
-    ) as Resource[];
-    let valueIndex = 0;
-
-    for (let i = 0; i < tileResources.length; i++) {
-      const tileValue =
-        tileResources[i] === 'ROBBERS' ? 7 : tileValues[valueIndex++];
-      const tilePosition = tilesCoordinates[(i + 1).toString()];
-
-      this.tiles.set(i + 1, {
-        resource: tileResources[i],
-        value: tileValue,
-        id: i + 1,
-        position: tilePosition,
-      });
     }
     Logger.log('Board initialised');
   }

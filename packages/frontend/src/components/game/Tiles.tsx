@@ -114,13 +114,20 @@ const Tiles = (props) => {
   //position={[tileData.position.x, 0, tileData.position.z]}
 
   return (
-    <group name="tiles">
-      {tiles.map((tileData, index) => {
-        const TileComponent = resourceToModel[tileData.resource];
-        const position: Vector3 = [tileData.position.x, 0, tileData.position.z];
-        return <TileComponent key={index} position={position} />;
-      })}
-    </group>
+    <>
+      <group name="tiles">
+        {tiles.map((tileData, index) => {
+          const TileComponent = resourceToModel[tileData.resource];
+          const position: Vector3 = [
+            tileData.position.screen.x,
+            0,
+            tileData.position.screen.z,
+          ];
+          return <TileComponent key={index} position={position} />;
+        })}
+      </group>
+      {/* <group name="spots"></group> */}
+    </>
   );
 };
 
