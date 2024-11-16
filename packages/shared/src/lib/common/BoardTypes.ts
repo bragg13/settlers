@@ -22,15 +22,19 @@ export type Spot = {
 
 // roads
 export type Road = {
-  from: Spot['id'];
-  to: Spot['id'];
   id: number;
   owner: Socket['id'] | null;
   position: {
-    x: number;
-    y: number;
-    z: number;
-    yangle: number;
+    board: {
+      from: Spot['id'];
+      to: Spot['id'];
+    };
+    screen: {
+      x: number;
+      y: number;
+      z: number;
+      yangle: number;
+    };
   };
 };
 
@@ -59,4 +63,4 @@ export type Delta = {
   player: Socket['id'];
   details: unknown;
   timestamp: number;
-};
+} | null;

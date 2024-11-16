@@ -19,8 +19,8 @@ import { bfs_roads, bfs_spots } from './utils/bfs';
 
 export class MapBoard {
   private NUM_SPOTS = 54;
-  private NUM_TILES = 19;
-  private Y_SPOT = 1;
+  private Y_SPOT = 0.2;
+  private Y_ROAD = 0.18;
   private Y_TILE = 0;
   private HEX_SIZE = 0.6;
   public spots: Map<Spot['id'], Spot> = new Map<Spot['id'], Spot>();
@@ -28,6 +28,7 @@ export class MapBoard {
   public roads: Map<Road['id'], Road> = new Map<Road['id'], Road>();
   deltas: Delta[] = [];
 
+  // potrebbe essere overkill, basta l'id e non l'intera road
   public roadsGraph: {
     [from: Spot['id']]: {
       [to: Spot['id']]: Road;
@@ -56,7 +57,7 @@ export class MapBoard {
       spotTileCorner
     );
 
-    this.spots.set(spot_id, {
+    const spotData = {
       id: spot_id,
       owner: null,
       settlementType: null,
@@ -68,35 +69,52 @@ export class MapBoard {
           ...spotPositionBoard,
         },
       },
-    });
+    };
+    this.spots.set(spot_id, spotData);
+    console.log(spotData);
   }
 
   public initRoad(
     road_id: Road['id'],
     spot1: Spot['id'],
-    spot2: Spot['id'],
-    position: Road['position']
+    spot2: Spot['id']
   ): void {
+    const screenPosition = this.roadScreenPositionGivenSpots(spot1, spot2);
+
     this.roadsGraph[spot1][spot2] = {
-      from: spot1,
-      to: spot2,
       id: road_id,
       owner: null,
-      position: { ...position },
+      position: {
+        board: {
+          from: spot1,
+          to: spot2,
+        },
+        screen: {
+          ...screenPosition,
+        },
+      },
     };
     this.roadsGraph[spot2][spot1] = {
-      from: spot2,
-      to: spot1,
       id: road_id,
       owner: null,
-      position: { ...position },
+      position: {
+        board: {
+          from: spot2,
+          to: spot1,
+        },
+        screen: { ...screenPosition },
+      },
     };
     this.roads.set(road_id, {
-      from: spot1,
-      to: spot2,
       id: road_id,
       owner: null,
-      position: { ...position },
+      position: {
+        board: {
+          from: spot1,
+          to: spot2,
+        },
+        screen: { ...screenPosition },
+      },
     });
   }
   public getDeltaUpdates(): ServerPayloads[ServerEvents.DeltaUpdate] {
@@ -105,6 +123,7 @@ export class MapBoard {
     return deltas;
   }
 
+  // helpers for coordinates
   private spotBoardToScreen(
     tileScreenPosition: Tile['position']['screen'],
     tileCorner: number
@@ -124,6 +143,36 @@ export class MapBoard {
     return { x, y: this.Y_TILE, z };
   }
 
+  private roadScreenPositionGivenSpots(spot1: Spot['id'], spot2: Spot['id']) {
+    // get spot positions on screen
+    const pos1 = this.spots.get(spot1).position.screen;
+    const pos2 = this.spots.get(spot2).position.screen;
+
+    // calculate mid point
+    const midX = (pos1.x + pos2.x) / 2;
+    const midZ = (pos1.z + pos2.z) / 2;
+
+    // calculate y rotation angle
+    // case: |
+    let yangle = 0;
+
+    if (pos1.x < pos2.x && pos1.z > pos2.z) {
+      // case: \
+      yangle = 30;
+    } else if (pos1.x < pos2.x && pos1.z < pos2.z) {
+      // case: /
+      yangle = -30;
+    }
+
+    return {
+      x: midX,
+      y: this.Y_ROAD,
+      z: midZ,
+      yangle,
+    };
+  }
+
+  // main initialisation function for the board
   public initBoard(): void {
     // initialise the 'graph' part of the board aka spots/roads
     const tilesCoordinates = board_coordinates['tiles'];
@@ -156,28 +205,25 @@ export class MapBoard {
       });
     }
 
-    // spots and roads
+    // spots and roads - currently doing 2 for loops because
+    // to calculate road screen position i need spots positions
     for (let spotId = 1; spotId <= this.NUM_SPOTS; spotId++) {
       const spotPositionBoard = spotsCoordinates[spotId.toString()];
       const tilePositionBoard = this.tiles.get(spotPositionBoard.hex).position
         .board;
       this.initSpot(spotId, tilePositionBoard, spotPositionBoard);
+    }
 
+    for (let spotId = 1; spotId <= this.NUM_SPOTS; spotId++) {
       const from = spotId.toString();
 
       for (const to of Object.keys(road_connections[from])) {
-        // road = { 4: '1', 5: '2' }
         const roadId = road_connections[from][to];
-        const roadPosition = roadsCoordinates[roadId];
 
-        this.initRoad(
-          parseInt(roadId),
-          parseInt(from),
-          parseInt(to),
-          roadPosition
-        );
+        this.initRoad(parseInt(roadId), parseInt(from), parseInt(to));
       }
     }
+    console.log(this.roads.size);
     Logger.log('Board initialised');
   }
 

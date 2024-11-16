@@ -1,8 +1,7 @@
 import { Button, Stack, Typography } from '@mui/material';
 import { useSocketManager } from '../hooks/useSocketManager';
 import { Canvas } from '@react-three/fiber';
-import { GameAction, ServerEvents, ServerPayloads } from '@settlers/shared';
-import { useEffect } from 'react';
+import { GameAction } from '@settlers/shared';
 import {
   useAvailableActions,
   useLobbyState,
@@ -22,12 +21,6 @@ const PlayPage = () => {
   return (
     <>
       <Canvas camera={{ position: [0, 1.5, 2.5] }}>
-        {/* <Environment
-          files={'/winter_lake.hdr'}
-          background
-          backgroundBlurriness={0.2}
-        /> */}
-
         <MainScene />
         <Stats />
         <axesHelper />
