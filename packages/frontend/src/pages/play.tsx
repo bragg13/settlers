@@ -21,7 +21,7 @@ const PlayPage = () => {
 
   return (
     <>
-      <Canvas camera={{ position: [0, 1, 2] }}>
+      <Canvas camera={{ position: [0, 1.5, 2.5] }}>
         {/* <Environment
           files={'/winter_lake.hdr'}
           background
@@ -29,8 +29,8 @@ const PlayPage = () => {
         /> */}
         <MainScene />
         <Stats />
-        <OrbitControls />
         <axesHelper />
+        <OrbitControls />
         <gridHelper />
       </Canvas>
 

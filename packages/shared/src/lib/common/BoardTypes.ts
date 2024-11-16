@@ -7,6 +7,11 @@ export type Spot = {
   id: number;
   settlementType: SettlementType;
   owner: Socket['id'] | null;
+  position: {
+    x: number;
+    y: number;
+    z: number;
+  };
 };
 
 // roads
@@ -15,6 +20,12 @@ export type Road = {
   to: Spot['id'];
   id: number;
   owner: Socket['id'] | null;
+  position: {
+    x: number;
+    y: number;
+    z: number;
+    yangle: number;
+  };
 };
 
 // tiles
@@ -22,6 +33,11 @@ export type Tile = {
   id: number;
   resource: Resource;
   value: number;
+  position: {
+    x: number;
+    y: number;
+    z: number;
+  };
 };
 
 export type Resource = 'WOOD' | 'BRICK' | 'SHEEP' | 'WHEAT' | 'ORE' | 'ROBBERS';

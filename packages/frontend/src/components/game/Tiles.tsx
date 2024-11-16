@@ -8,6 +8,7 @@ import { Sheep3DTile } from '../tiles/Sheep';
 import { Wheat3DTile } from '../tiles/Wheat';
 import { Wood3DTile } from '../tiles/Wood';
 import { useLobbyState } from './GameContext';
+import { Vector3 } from '@react-three/fiber';
 
 type Tile3D =
   | typeof Clay3DTile
@@ -110,13 +111,14 @@ const Tiles = (props) => {
   //         // make the text always rotate on its y axis
   //         text.position.set(0, 0.4, 0);
   //         model.add(text);
+  //position={[tileData.position.x, 0, tileData.position.z]}
 
   return (
     <group name="tiles">
       {tiles.map((tileData, index) => {
         const TileComponent = resourceToModel[tileData.resource];
-
-        return <TileComponent key={index} />;
+        const position: Vector3 = [tileData.position.x, 0, tileData.position.z];
+        return <TileComponent key={index} position={position} />;
       })}
     </group>
   );

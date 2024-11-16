@@ -1,4 +1,5 @@
 import * as road_connections from './utils/road_connections.json';
+import * as board_coordinates from './utils/board_coordinates.json';
 import * as board_constants from './utils/board_constants.json';
 import { Logger } from '@nestjs/common';
 import {
@@ -37,36 +38,41 @@ export class MapBoard {
   }
 
   // initalise the graph
-  public initSpot(spot_id: Spot['id']): void {
+  public initSpot(spot_id: Spot['id'], position: Spot['position']): void {
     this.spots.set(spot_id, {
       id: spot_id,
       owner: null,
       settlementType: null,
+      position: { ...position },
     });
   }
 
   public initRoad(
     road_id: Road['id'],
     spot1: Spot['id'],
-    spot2: Spot['id']
+    spot2: Spot['id'],
+    position: Road['position']
   ): void {
     this.roadsGraph[spot1][spot2] = {
       from: spot1,
       to: spot2,
       id: road_id,
       owner: null,
+      position: { ...position },
     };
     this.roadsGraph[spot2][spot1] = {
       from: spot2,
       to: spot1,
       id: road_id,
       owner: null,
+      position: { ...position },
     };
     this.roads.set(road_id, {
       from: spot1,
       to: spot2,
       id: road_id,
       owner: null,
+      position: { ...position },
     });
   }
   public getDeltaUpdates(): ServerPayloads[ServerEvents.DeltaUpdate] {
@@ -77,13 +83,26 @@ export class MapBoard {
 
   public initBoard(): void {
     // initialise the 'graph' part of the board aka spots/roads
+    const tilesCoordinates = board_coordinates['tiles'];
+    const spotsCoordinates = board_coordinates['spots'];
+    const roadsCoordinates = board_coordinates['roads'];
+
     for (let spot = 1; spot <= this.NUM_SPOTS; spot++) {
-      this.initSpot(spot);
+      const spotPosition = spotsCoordinates[spot.toString()];
+      this.initSpot(spot, spotPosition);
       const from = spot.toString();
+
       for (const to of Object.keys(road_connections[from])) {
         // road = { 4: '1', 5: '2' }
-        const road_id = parseInt(road_connections[from][to]);
-        this.initRoad(road_id, parseInt(from), parseInt(to));
+        const roadId = road_connections[from][to];
+        const roadPosition = roadsCoordinates[roadId];
+
+        this.initRoad(
+          parseInt(roadId),
+          parseInt(from),
+          parseInt(to),
+          roadPosition
+        );
       }
     }
 
@@ -99,11 +118,13 @@ export class MapBoard {
     for (let i = 0; i < tileResources.length; i++) {
       const tileValue =
         tileResources[i] === 'ROBBERS' ? 7 : tileValues[valueIndex++];
+      const tilePosition = tilesCoordinates[(i + 1).toString()];
 
       this.tiles.set(i + 1, {
         resource: tileResources[i],
         value: tileValue,
         id: i + 1,
+        position: tilePosition,
       });
     }
     Logger.log('Board initialised');
@@ -147,8 +168,9 @@ export class MapBoard {
     settlement_type: SettlementType,
     player: Socket['id']
   ): void {
+    const spot = this.spots.get(spot_id);
     this.spots.set(spot_id, {
-      id: spot_id,
+      ...spot,
       owner: player,
       settlementType: settlement_type,
     });
@@ -175,16 +197,14 @@ export class MapBoard {
     spot2: Spot['id'],
     player: Socket['id']
   ): void {
-    console.log(this.roadsGraph);
     this.roadsGraph[spot1][spot2].owner = player;
     this.roadsGraph[spot2][spot1].owner = player;
 
-    const roadId = this.roadsGraph[spot2][spot1].id;
+    const roadId = this.roadsGraph[spot1][spot2].id;
+    const road = this.roads.get(roadId);
     this.roads.set(roadId, {
-      from: spot1,
-      to: spot2,
-      id: roadId,
-      owner: null,
+      ...road,
+      owner: player,
     });
 
     console.log(`built: ${this.roadsGraph[spot1][spot2]}`);

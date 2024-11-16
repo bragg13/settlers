@@ -1,5 +1,4 @@
 import { useControls } from 'leva';
-import Sheep from '../tiles/Sheep';
 import { useEffect } from 'react';
 import { useSocketManager } from '../../hooks/useSocketManager';
 import { Delta, ServerEvents, ServerPayloads } from '@settlers/shared';
