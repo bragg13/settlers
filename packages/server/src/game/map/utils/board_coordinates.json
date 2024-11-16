@@ -23,15 +23,15 @@
   "spots": {
     "1": {
       "hex": 1,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "2": {
       "hex": 2,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "3": {
       "hex": 3,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "4": {
       "hex": 1,
@@ -47,24 +47,27 @@
     },
     "7": {
       "hex": 3,
-      "hexCorner": 1
+      "hexCorner": 5
     },
+
     "8": {
       "hex": 4,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "9": {
       "hex": 5,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "10": {
       "hex": 6,
-      "hexCorner": 2
+      "hexCorner": 4
     },
+
     "11": {
       "hex": 7,
-      "hexCorner": 2
+      "hexCorner": 4
     },
+
     "12": {
       "hex": 4,
       "hexCorner": 3
@@ -83,27 +86,27 @@
     },
     "16": {
       "hex": 7,
-      "hexCorner": 1
+      "hexCorner": 5
     },
     "17": {
       "hex": 8,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "18": {
       "hex": 9,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "19": {
       "hex": 10,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "20": {
       "hex": 11,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "21": {
       "hex": 12,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "22": {
       "hex": 8,
@@ -127,27 +130,27 @@
     },
     "27": {
       "hex": 12,
-      "hexCorner": 1
+      "hexCorner": 5
     },
     "28": {
       "hex": 8,
-      "hexCorner": 4
+      "hexCorner": 2
     },
     "29": {
       "hex": 13,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "30": {
       "hex": 14,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "31": {
       "hex": 15,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "32": {
       "hex": 16,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "33": {
       "hex": 12,
@@ -171,23 +174,23 @@
     },
     "38": {
       "hex": 16,
-      "hexCorner": 1
+      "hexCorner": 5
     },
     "39": {
       "hex": 13,
-      "hexCorner": 4
+      "hexCorner": 2
     },
     "40": {
       "hex": 17,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "41": {
       "hex": 18,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "42": {
       "hex": 19,
-      "hexCorner": 2
+      "hexCorner": 4
     },
     "43": {
       "hex": 16,
@@ -207,11 +210,11 @@
     },
     "47": {
       "hex": 19,
-      "hexCorner": 1
+      "hexCorner": 5
     },
     "48": {
       "hex": 17,
-      "hexCorner": 4
+      "hexCorner": 2
     },
     "49": {
       "hex": 17,
@@ -227,15 +230,15 @@
     },
     "52": {
       "hex": 17,
-      "hexCorner": 5
+      "hexCorner": 1
     },
     "53": {
       "hex": 18,
-      "hexCorner": 5
+      "hexCorner": 1
     },
     "54": {
       "hex": 19,
-      "hexCorner": 5
+      "hexCorner": 1
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Html } from '@react-three/drei';
 
-export function Annotation({ position, text }) {
+export function Annotation({ color, position, text }) {
   // const { camera } = useThree();
   // const [selected, setSelected] = useState(-1);
   console.log(text);
@@ -14,7 +14,7 @@ export function Annotation({ position, text }) {
           r="16"
           stroke="white"
           strokeWidth="2"
-          fill="rgba(0,0,0,.66)"
+          fill={color}
           // onPointerDown={() => {
           //   setSelected(i);
           //   // change target

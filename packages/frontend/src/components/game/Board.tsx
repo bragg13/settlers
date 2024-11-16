@@ -19,6 +19,7 @@ import { Spot3D } from '../models/Spot3D';
 import { Box, Plane } from '@react-three/drei';
 import { Sea } from '../models/Sea';
 import { Road3D } from '../models/Road3D';
+import { Annotation } from '../tiles/TileValue';
 
 type Tile3D =
   | typeof Clay3DTile
@@ -161,7 +162,16 @@ const Board = (props) => {
             0,
             tileData.position.screen.z,
           ];
-          return <TileComponent key={index} position={position} />;
+          return (
+            <>
+              <Annotation
+                color={'red'}
+                position={position}
+                text={tileData.id}
+              />
+              <TileComponent key={index} position={position} />;
+            </>
+          );
         })}
       </group>
       <group name="spots">

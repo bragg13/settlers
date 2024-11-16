@@ -128,7 +128,7 @@ export class MapBoard {
     tileScreenPosition: Tile['position']['screen'],
     tileCorner: number
   ) {
-    const angle_deg = 60 * tileCorner - 30;
+    const angle_deg = 60 * tileCorner + 30;
     const angle_rad = (Math.PI / 180) * angle_deg;
     const x = tileScreenPosition.x + this.HEX_SIZE * Math.cos(angle_rad);
     const z = tileScreenPosition.z + this.HEX_SIZE * Math.sin(angle_rad);
@@ -207,22 +207,30 @@ export class MapBoard {
 
     // spots and roads - currently doing 2 for loops because
     // to calculate road screen position i need spots positions
-    for (let spotId = 1; spotId <= this.NUM_SPOTS; spotId++) {
+    for (
+      let spotId = 1;
+      spotId <= Object.keys(spotsCoordinates).length;
+      spotId++
+    ) {
       const spotPositionBoard = spotsCoordinates[spotId.toString()];
       const tilePositionBoard = this.tiles.get(spotPositionBoard.hex).position
         .board;
       this.initSpot(spotId, tilePositionBoard, spotPositionBoard);
     }
 
-    for (let spotId = 1; spotId <= this.NUM_SPOTS; spotId++) {
-      const from = spotId.toString();
+    // for (
+    //   let spotId = 1;
+    //   spotId <= Object.keys(spotsCoordinates).length;
+    //   spotId++
+    // ) {
+    //   const from = spotId.toString();
 
-      for (const to of Object.keys(road_connections[from])) {
-        const roadId = road_connections[from][to];
+    //   for (const to of Object.keys(road_connections[from])) {
+    //     const roadId = road_connections[from][to];
 
-        this.initRoad(parseInt(roadId), parseInt(from), parseInt(to));
-      }
-    }
+    //     this.initRoad(parseInt(roadId), parseInt(from), parseInt(to));
+    //   }
+    // }
     console.log(this.roads.size);
     Logger.log('Board initialised');
   }
