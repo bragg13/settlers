@@ -139,7 +139,6 @@ export class MapBoard {
     spot1: Spot['id'],
     spot2: Spot['id']
   ): roadScreenPosition {
-    console.log('==');
     // get spot positions on screen
     const pos1: screenPosition = this.spots.get(spot1).position.screen;
     const pos2: screenPosition = this.spots.get(spot2).position.screen;
@@ -154,26 +153,20 @@ export class MapBoard {
     const midX: number = (x1 + x2) / 2;
     const midZ: number = (z1 + z2) / 2;
 
-    console.log(`spot ${spot1} pos ${x1} ${z1}`);
-    console.log(`spot ${spot2} pos ${x2} ${z2}`);
+    // console.log('==');
+    // console.log(`spot ${spot2} pos ${x2} ${z2}`);
+    // console.log(`spot ${spot1} pos ${x1} ${z1}`);
 
     // calculate y rotation angle
     const epsilon = 0.00000000001;
     if (Math.abs(x1 - x2) < epsilon) {
       yangle = 3.14 / 2;
-      console.log(`${x1} - ${x2} = ${x1 - x2}`);
       console.log('|');
+    } else if (x1 < x2 && z1 < z2) {
+      yangle = 2.62;
     } else {
-      yangle = 0;
+      yangle = 0.52;
     }
-    // else if (x1 - x2 && z1 < z2) {
-    //   yangle = Math.PI / 6;
-    //   console.log('/');
-    // } else if (x1 < x2 && z1 < z2) {
-    //   yangle = (5 * Math.PI) / 6;
-    //   console.log('\\');
-    // }
-    console.log(`Yangle ${yangle}`);
 
     return {
       x: midX,

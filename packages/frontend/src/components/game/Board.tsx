@@ -108,7 +108,14 @@ const Board = (props) => {
             spotData.position.screen.z,
           ];
           return (
-            <Spot3D key={index} position={position} spotId={spotData.id} />
+            <>
+              {/* <Annotation
+                color={'red'}
+                position={position}
+                text={tileData.id}
+              /> */}
+              <Spot3D key={index} position={position} />
+            </>
           );
         })}
       </group>
@@ -121,11 +128,18 @@ const Board = (props) => {
           ];
           console.log(roadData);
           return (
-            <Road3D
-              key={index}
-              yangle={roadData.position.screen.yangle}
-              position={position}
-            />
+            <>
+              {/* <Annotation
+                color={'red'}
+                position={position}
+                text={tileData.id}
+              /> */}
+              <Road3D
+                key={index}
+                yangle={roadData.position.screen.yangle}
+                position={position}
+              />
+            </>
           );
         })}
       </group>

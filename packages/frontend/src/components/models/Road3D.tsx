@@ -1,12 +1,9 @@
 import { Box } from '@react-three/drei';
-import { useControls } from 'leva';
-import { useRef } from 'react';
+import { JSX } from 'react/jsx-runtime';
 
-export function Road3D(props) {
-  const ref = useRef(null);
-
+export function Road3D(props: JSX.IntrinsicAttributes) {
   return (
-    <Box rotation-y={props.yangle} {...props} scale={[0.2, 0.1, 0.1]}>
+    <Box rotation-y={props.yangle} {...props} scale={[0.3, 0.1, 0.05]}>
       <meshStandardMaterial color={'white'} />
     </Box>
   );
