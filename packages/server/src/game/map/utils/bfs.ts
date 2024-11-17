@@ -38,14 +38,16 @@ export function bfs_spots(
 export function bfs_roads(
   settlementsBuiltByPlayer: Array<Spot>,
   spots: Map<Spot['id'], Spot>,
-  roads: {
+  roadsGraph: {
     [from: Spot['id']]: {
-      [to: Spot['id']]: Road;
+      [to: Spot['id']]: Road['id'];
     };
   },
+  roads: Map<Road['id'], Road>,
   player: Socket['id']
 ): Array<Road> {
-  const availableRoads = [];
+  const availableRoads: Road[] = [];
+
   for (const town of settlementsBuiltByPlayer) {
     const queue: Array<Spot['id']> = [];
     const explored = {};
@@ -59,15 +61,17 @@ export function bfs_roads(
       // check adjacents
       for (const adj of Object.keys(roads[t])) {
         if (!explored[adj]) {
+          const roadId = roads[t][adj];
+
           // se la strada è libera -> available
-          if (roads[t][adj].owner === null) {
+          if (roads.get(roadId).owner === null) {
             availableRoads.push({
-              ...roads[t][adj],
+              ...roads.get(roadId),
             });
           }
 
           // se la strada e' mia -> queue
-          if (roads[t][adj].owner === player) {
+          if (roads.get(roadId).owner === player) {
             queue.push(parseInt(adj));
           }
         }

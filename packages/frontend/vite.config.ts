@@ -11,6 +11,12 @@ export default defineConfig({
   server: {
     port: 4200,
     host: 'localhost',
+    hmr: {
+      // Reduce HMR polling interval
+      overlay: false,
+      // Increase the timeout
+      timeout: 5000,
+    },
   },
 
   preview: {
@@ -31,6 +37,14 @@ export default defineConfig({
     reportCompressedSize: true,
     commonjsOptions: {
       transformMixedEsModules: true,
+      include: [],
     },
+    // Reduce source map generation in dev
+    sourcemap: false,
+  },
+
+  optimizeDeps: {
+    // Exclude heavy dependencies from optimization if not frequently changed
+    exclude: ['three'], // Add your heavy dependencies
   },
 });

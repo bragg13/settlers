@@ -3,7 +3,6 @@ import { Html } from '@react-three/drei';
 export function Annotation({ color, position, text }) {
   // const { camera } = useThree();
   // const [selected, setSelected] = useState(-1);
-  console.log(text);
 
   return (
     <Html key={text} position={[position[0], position[1], position[2]]}>

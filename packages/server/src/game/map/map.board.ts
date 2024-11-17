@@ -16,6 +16,12 @@ import {
 import { Socket } from 'socket.io';
 import { randomInt } from 'crypto';
 import { bfs_roads, bfs_spots } from './utils/bfs';
+import {
+  roadScreenPosition,
+  screenPosition,
+  spotBoardPosition,
+  tileBoardPosition,
+} from 'packages/shared/src/lib/common/BoardTypes';
 
 export class MapBoard {
   private NUM_SPOTS = 54;
@@ -31,7 +37,7 @@ export class MapBoard {
   // potrebbe essere overkill, basta l'id e non l'intera road
   public roadsGraph: {
     [from: Spot['id']]: {
-      [to: Spot['id']]: Road;
+      [to: Spot['id']]: Road['id'];
     };
   } = {};
 
@@ -44,14 +50,14 @@ export class MapBoard {
   // initalise the graph
   public initSpot(
     spot_id: Spot['id'],
-    tilePositionBoard: Tile['position']['board'],
-    spotPositionBoard: Spot['position']['board']
+    tilePositionBoard: tileBoardPosition,
+    spotPositionBoard: spotBoardPosition
   ): void {
     // get screen position of tile
     const tileScreenPosition = this.tileBoardToScreen(tilePositionBoard);
 
     // get spot position on screen
-    const spotTileCorner = spotPositionBoard.hexCorner;
+    const spotTileCorner = spotPositionBoard.tileCorner;
     const spotPositionScreen = this.spotBoardToScreen(
       tileScreenPosition,
       spotTileCorner
@@ -71,7 +77,6 @@ export class MapBoard {
       },
     };
     this.spots.set(spot_id, spotData);
-    console.log(spotData);
   }
 
   public initRoad(
@@ -79,9 +84,9 @@ export class MapBoard {
     spot1: Spot['id'],
     spot2: Spot['id']
   ): void {
-    const screenPosition = this.roadScreenPositionGivenSpots(spot1, spot2);
-
-    this.roadsGraph[spot1][spot2] = {
+    const screenPosition: roadScreenPosition =
+      this.roadScreenPositionGivenSpots(spot1, spot2);
+    const roadObject = {
       id: road_id,
       owner: null,
       position: {
@@ -90,33 +95,20 @@ export class MapBoard {
           to: spot2,
         },
         screen: {
-          ...screenPosition,
+          x: screenPosition.x,
+          y: screenPosition.y,
+          yangle: screenPosition.yangle,
+          z: screenPosition.z,
         },
       },
     };
-    this.roadsGraph[spot2][spot1] = {
-      id: road_id,
-      owner: null,
-      position: {
-        board: {
-          from: spot2,
-          to: spot1,
-        },
-        screen: { ...screenPosition },
-      },
-    };
-    this.roads.set(road_id, {
-      id: road_id,
-      owner: null,
-      position: {
-        board: {
-          from: spot1,
-          to: spot2,
-        },
-        screen: { ...screenPosition },
-      },
-    });
+
+    // i could directly import road_connections as roadsGraph
+    this.roadsGraph[spot1][spot2] = road_id;
+    this.roadsGraph[spot2][spot1] = road_id;
+    this.roads.set(road_id, roadObject);
   }
+
   public getDeltaUpdates(): ServerPayloads[ServerEvents.DeltaUpdate] {
     const deltas = [...this.deltas];
     this.deltas = [];
@@ -125,9 +117,9 @@ export class MapBoard {
 
   // helpers for coordinates
   private spotBoardToScreen(
-    tileScreenPosition: Tile['position']['screen'],
+    tileScreenPosition: screenPosition,
     tileCorner: number
-  ) {
+  ): screenPosition {
     const angle_deg = 60 * tileCorner + 30;
     const angle_rad = (Math.PI / 180) * angle_deg;
     const x = tileScreenPosition.x + this.HEX_SIZE * Math.cos(angle_rad);
@@ -135,7 +127,7 @@ export class MapBoard {
     return { x, y: this.Y_SPOT, z };
   }
 
-  private tileBoardToScreen(boardPosition: Tile['position']['board']) {
+  private tileBoardToScreen(boardPosition: tileBoardPosition): screenPosition {
     const x =
       this.HEX_SIZE *
       (Math.sqrt(3) * boardPosition.q + (Math.sqrt(3) / 2) * boardPosition.r);
@@ -143,26 +135,45 @@ export class MapBoard {
     return { x, y: this.Y_TILE, z };
   }
 
-  private roadScreenPositionGivenSpots(spot1: Spot['id'], spot2: Spot['id']) {
+  private roadScreenPositionGivenSpots(
+    spot1: Spot['id'],
+    spot2: Spot['id']
+  ): roadScreenPosition {
+    console.log('==');
     // get spot positions on screen
-    const pos1 = this.spots.get(spot1).position.screen;
-    const pos2 = this.spots.get(spot2).position.screen;
+    const pos1: screenPosition = this.spots.get(spot1).position.screen;
+    const pos2: screenPosition = this.spots.get(spot2).position.screen;
+
+    let yangle: number;
+    const x1: number = pos1.x;
+    const x2: number = pos2.x;
+    const z1: number = pos1.z;
+    const z2: number = pos2.z;
 
     // calculate mid point
-    const midX = (pos1.x + pos2.x) / 2;
-    const midZ = (pos1.z + pos2.z) / 2;
+    const midX: number = (x1 + x2) / 2;
+    const midZ: number = (z1 + z2) / 2;
+
+    console.log(`spot ${spot1} pos ${x1} ${z1}`);
+    console.log(`spot ${spot2} pos ${x2} ${z2}`);
 
     // calculate y rotation angle
-    // case: |
-    let yangle = 0;
-
-    if (pos1.x < pos2.x && pos1.z > pos2.z) {
-      // case: \
-      yangle = 30;
-    } else if (pos1.x < pos2.x && pos1.z < pos2.z) {
-      // case: /
-      yangle = -30;
+    const epsilon = 0.00000000001;
+    if (Math.abs(x1 - x2) < epsilon) {
+      yangle = 3.14 / 2;
+      console.log(`${x1} - ${x2} = ${x1 - x2}`);
+      console.log('|');
+    } else {
+      yangle = 0;
     }
+    // else if (x1 - x2 && z1 < z2) {
+    //   yangle = Math.PI / 6;
+    //   console.log('/');
+    // } else if (x1 < x2 && z1 < z2) {
+    //   yangle = (5 * Math.PI) / 6;
+    //   console.log('\\');
+    // }
+    console.log(`Yangle ${yangle}`);
 
     return {
       x: midX,
@@ -177,7 +188,6 @@ export class MapBoard {
     // initialise the 'graph' part of the board aka spots/roads
     const tilesCoordinates = board_coordinates['tiles'];
     const spotsCoordinates = board_coordinates['spots'];
-    const roadsCoordinates = board_coordinates['roads'];
 
     // tiles
     const tileValues = board_constants['tileValues'].sort(
@@ -191,8 +201,10 @@ export class MapBoard {
     for (let i = 0; i < tileResources.length; i++) {
       const tileValue =
         tileResources[i] === 'ROBBERS' ? 7 : tileValues[valueIndex++];
-      const tilePositionBoard = tilesCoordinates[(i + 1).toString()];
-      const tilePositionScreen = this.tileBoardToScreen(tilePositionBoard);
+      const tilePositionBoard: tileBoardPosition =
+        tilesCoordinates[(i + 1).toString()];
+      const tilePositionScreen: screenPosition =
+        this.tileBoardToScreen(tilePositionBoard);
 
       this.tiles.set(i + 1, {
         resource: tileResources[i],
@@ -212,26 +224,30 @@ export class MapBoard {
       spotId <= Object.keys(spotsCoordinates).length;
       spotId++
     ) {
-      const spotPositionBoard = spotsCoordinates[spotId.toString()];
-      const tilePositionBoard = this.tiles.get(spotPositionBoard.hex).position
-        .board;
+      const spotPositionBoard: spotBoardPosition =
+        spotsCoordinates[spotId.toString()];
+      const tilePositionBoard: tileBoardPosition = this.tiles.get(
+        spotPositionBoard.tile
+      ).position.board;
       this.initSpot(spotId, tilePositionBoard, spotPositionBoard);
     }
 
-    // for (
-    //   let spotId = 1;
-    //   spotId <= Object.keys(spotsCoordinates).length;
-    //   spotId++
-    // ) {
-    //   const from = spotId.toString();
+    for (
+      let spotId = 1;
+      spotId <= Object.keys(spotsCoordinates).length;
+      spotId++
+    ) {
+      const from = spotId.toString();
 
-    //   for (const to of Object.keys(road_connections[from])) {
-    //     const roadId = road_connections[from][to];
+      for (const to of Object.keys(road_connections[from])) {
+        const roadId = road_connections[from][to];
+        const roadTobeSetup = this.roadsGraph[from][to] == undefined;
 
-    //     this.initRoad(parseInt(roadId), parseInt(from), parseInt(to));
-    //   }
-    // }
-    console.log(this.roads.size);
+        if (roadTobeSetup) {
+          this.initRoad(parseInt(roadId), parseInt(from), parseInt(to));
+        }
+      }
+    }
     Logger.log('Board initialised');
   }
 
@@ -255,6 +271,7 @@ export class MapBoard {
       settlementsBuiltByPlayer,
       this.spots,
       this.roadsGraph,
+      this.roads,
       player
     );
   };
@@ -302,10 +319,10 @@ export class MapBoard {
     spot2: Spot['id'],
     player: Socket['id']
   ): void {
-    this.roadsGraph[spot1][spot2].owner = player;
-    this.roadsGraph[spot2][spot1].owner = player;
+    // this.roadsGraph[spot1][spot2].owner = player;
+    // this.roadsGraph[spot2][spot1].owner = player;
 
-    const roadId = this.roadsGraph[spot1][spot2].id;
+    const roadId = this.roadsGraph[spot1][spot2];
     const road = this.roads.get(roadId);
     this.roads.set(roadId, {
       ...road,
@@ -317,7 +334,7 @@ export class MapBoard {
       action: GameAction.ActionBuildRoad,
       player,
       details: {
-        newRoad: this.roadsGraph[spot1][spot2],
+        newRoad: road,
       },
       timestamp: Date.now(),
     });

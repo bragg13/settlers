@@ -1,6 +1,30 @@
 import { Socket } from 'socket.io';
 import { GameAction, Player } from '../shared';
 
+export type screenPosition = {
+  x: number;
+  y: number;
+  z: number;
+};
+export type spotBoardPosition = {
+  tile: number;
+  tileCorner: number;
+};
+export type roadBoardPosition = {
+  from: Spot['id'];
+  to: Spot['id'];
+};
+export type roadScreenPosition = {
+  x: number;
+  y: number;
+  yangle: number;
+  z: number;
+};
+export type tileBoardPosition = {
+  q: number;
+  r: number;
+};
+
 // settlement
 export type SettlementType = 'city' | 'village' | null;
 export type Spot = {
@@ -8,15 +32,8 @@ export type Spot = {
   settlementType: SettlementType;
   owner: Socket['id'] | null;
   position: {
-    screen: {
-      x: number;
-      y: number;
-      z: number;
-    };
-    board: {
-      hex: number;
-      hexCorner: number;
-    };
+    screen: screenPosition;
+    board: spotBoardPosition;
   };
 };
 
@@ -25,16 +42,8 @@ export type Road = {
   id: number;
   owner: Socket['id'] | null;
   position: {
-    board: {
-      from: Spot['id'];
-      to: Spot['id'];
-    };
-    screen: {
-      x: number;
-      y: number;
-      z: number;
-      yangle: number;
-    };
+    board: roadBoardPosition;
+    screen: roadScreenPosition;
   };
 };
 
@@ -44,15 +53,8 @@ export type Tile = {
   resource: Resource;
   value: number;
   position: {
-    screen: {
-      x: number;
-      y: number;
-      z: number;
-    };
-    board: {
-      q: number;
-      r: number;
-    };
+    screen: screenPosition;
+    board: tileBoardPosition;
   };
 };
 
