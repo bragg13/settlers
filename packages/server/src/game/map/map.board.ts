@@ -260,6 +260,8 @@ export class MapBoard {
 
   public getAvailableRoads = (player: Socket['id']): Array<Road> => {
     const settlementsBuiltByPlayer = this.getSettlementsBuiltBy(player);
+    console.log('settl built by player:');
+    console.log(settlementsBuiltByPlayer);
     return bfs_roads(
       settlementsBuiltByPlayer,
       this.spots,

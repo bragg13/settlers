@@ -8,3 +8,8 @@ export function Road3D(props: JSX.IntrinsicAttributes) {
     </Box>
   );
 }
+
+// TODO
+// jeasing to move camera to spot selected when deciding where to build smth
+// show models based on game state (placeIniitalSettlments, ...)
+// show numbers values on top of tiles

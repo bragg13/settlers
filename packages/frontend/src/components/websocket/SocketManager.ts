@@ -116,6 +116,10 @@ export default class SocketManager {
       if (this.socketStateDispatch) {
         this.socketStateDispatch({
           type: 'DISCONNECT',
+          payload: {
+            username: '',
+            color: '',
+          },
         });
       }
     });

@@ -53,6 +53,7 @@ export class Instance {
           : null,
       buildableCities: null,
     };
+
     this.lobby.dispatchToCurrentPlayer(ServerEvents.AvailableActions, actions);
   }
 

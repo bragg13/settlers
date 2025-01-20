@@ -59,9 +59,9 @@ export function bfs_roads(
       explored[t] = true;
 
       // check adjacents
-      for (const adj of Object.keys(roads[t])) {
+      for (const adj of Object.keys(roadsGraph[t])) {
         if (!explored[adj]) {
-          const roadId = roads[t][adj];
+          const roadId = roadsGraph[t][adj];
 
           // se la strada è libera -> available
           if (roads.get(roadId).owner === null) {
