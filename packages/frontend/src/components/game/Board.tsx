@@ -22,6 +22,7 @@ import { Sea } from '../models/Sea';
 import { Road3D } from '../models/Road3D';
 import { Annotation } from '../tiles/TileValue';
 import { useControls } from 'leva';
+import LobbyPage from '../../pages/lobby';
 
 type Tile3D =
   | typeof Clay3DTile
@@ -68,7 +69,7 @@ const Board = (props) => {
   const { lobbyState } = useLobbyState();
 
   useEffect(() => {
-    if (tiles.length === 0) {
+    if (lobbyState !== null) {
       const boardTiles = JSON.parse(lobbyState.boardState.tiles);
       const spots = JSON.parse(lobbyState.boardState.spots);
       const roads = JSON.parse(lobbyState.boardState.roads);
@@ -77,6 +78,13 @@ const Board = (props) => {
       setRoads(Object.values(roads));
     }
   }, [lobbyState]);
+
+  const getPlayerColor = (player: string): string => {
+    const pg = lobbyState.players.find((el) => {
+      return el.socketId === player;
+    });
+    return pg ? pg.color : 'gray';
+  };
 
   return (
     <>
@@ -107,6 +115,7 @@ const Board = (props) => {
             spotData.position.screen.y,
             spotData.position.screen.z,
           ];
+
           return (
             <>
               {/* <Annotation
@@ -114,7 +123,13 @@ const Board = (props) => {
                 position={position}
                 text={tileData.id}
               /> */}
-              <Spot3D key={index} position={position} />
+              <Spot3D
+                key={index}
+                color={getPlayerColor(spotData.owner as string)}
+                owner={spotData.owner}
+                type={spotData.settlementType}
+                position={position}
+              />
             </>
           );
         })}
@@ -126,7 +141,7 @@ const Board = (props) => {
             roadData.position.screen.y,
             roadData.position.screen.z,
           ];
-          console.log(roadData);
+          // console.log(roadData);
           return (
             <>
               {/* <Annotation

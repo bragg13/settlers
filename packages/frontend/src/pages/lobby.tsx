@@ -52,9 +52,9 @@ const LobbyPage = () => {
   const [formLobby, setFormLobby] = useState<
     ClientPayloads[ClientEvents.LobbyJoin]
   >({
-    username: '',
-    color: '',
-    lobbyId: '',
+    username: 'andrea',
+    color: 'green',
+    lobbyId: '123',
   });
   const { playerInformation, setPlayerInformation } = usePlayerInformation();
   const [pageState, setPageState] = useState<PageState>('login');
