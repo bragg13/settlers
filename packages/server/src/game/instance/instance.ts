@@ -127,7 +127,12 @@ export class Instance {
     const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
 
     if (availableActions.includes(GameAction.ActionSetupSettlement)) {
-      this.board.buildSettlement(data.spotId, 'village', client.id);
+      this.board.buildSettlement(
+        data.spotId,
+        'village',
+        client.id,
+        GameAction.ActionSetupSettlement
+      );
       this.fsm.setupSteps[currentPlayerIndex]++;
       this.dispatchDeltaUpdate();
       this.dispatchAvailableActions();
@@ -146,7 +151,12 @@ export class Instance {
 
     // check that the action is legit from this state
     if (availableActions.includes(GameAction.ActionSetupRoad)) {
-      this.board.buildRoad(data.spot1, data.spot2, client.id);
+      this.board.buildRoad(
+        data.spot1,
+        data.spot2,
+        client.id,
+        GameAction.ActionSetupRoad
+      );
       this.fsm.setupSteps[currentPlayerIndex]++;
       this.turns.nextTurn();
       if (this.turns.getCurrentRound() === this.lobby.maxClients * 2) {

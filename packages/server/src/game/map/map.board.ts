@@ -283,7 +283,8 @@ export class MapBoard {
   public buildSettlement(
     spot_id: Spot['id'],
     settlement_type: SettlementType,
-    player: Socket['id']
+    player: Socket['id'],
+    game_action: GameAction
   ): void {
     const spot = this.spots.get(spot_id);
     this.spots.set(spot_id, {
@@ -299,7 +300,7 @@ export class MapBoard {
     }
 
     this.deltas.push({
-      action: GameAction.ActionBuildSettlement,
+      action: game_action,
       player,
       details: {
         newSettlement: spot_id,
@@ -312,7 +313,8 @@ export class MapBoard {
   public buildRoad(
     spot1: Spot['id'],
     spot2: Spot['id'],
-    player: Socket['id']
+    player: Socket['id'],
+    game_action: GameAction
   ): void {
     // this.roadsGraph[spot1][spot2].owner = player;
     // this.roadsGraph[spot2][spot1].owner = player;
@@ -326,7 +328,7 @@ export class MapBoard {
 
     console.log(`built: ${this.roadsGraph[spot1][spot2]}`);
     this.deltas.push({
-      action: GameAction.ActionBuildRoad,
+      action: game_action,
       player,
       details: {
         newRoad: road,

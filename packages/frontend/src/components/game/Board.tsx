@@ -30,14 +30,7 @@ import { useAtom } from 'jotai';
 import { roadsAtom, spotsAtom, tilesAtom } from '../atoms';
 import { showNotification } from '@mantine/notifications';
 import { DeltaDetail } from 'packages/shared/src/lib/common/BoardTypes';
-
-type Tile3D =
-  | typeof Clay3DTile
-  | typeof Robbers3DTile
-  | typeof Rocks3DTile
-  | typeof Sheep3DTile
-  | typeof Wheat3DTile
-  | typeof Wood3DTile;
+import { resourceToModel } from './types';
 
 const Board = (props) => {
   const sm = useSocketManager();
@@ -46,21 +39,36 @@ const Board = (props) => {
   const [roads, setRoads] = useAtom(roadsAtom);
   const { lobbyState } = useLobbyState();
 
+  // init board tiles and stuff
+  useEffect(() => {
+    const boardTiles = JSON.parse(lobbyState.boardState?.tiles as string);
+    const spots = JSON.parse(lobbyState.boardState?.spots as string);
+    const roads = JSON.parse(lobbyState.boardState?.roads as string);
+    setTiles(Object.values(boardTiles));
+    setSpots(Object.values(spots));
+    setRoads(Object.values(roads));
+    console.log('First board initialisation done.');
+  }, []);
+
   const getPlayer = (player: string): Player => {
     const pg = lobbyState.players.find((el) => {
       return el.socketId === player;
     });
-    return pg!;
+    return pg
+      ? pg
+      : ({
+          username: 'undefined?',
+          socketId: '',
+          color: 'white',
+        } as Player);
   };
 
   useEffect(() => {
     const onDeltaUpdate = (data: ServerPayloads[ServerEvents.DeltaUpdate]) => {
       for (const update of data) {
         if (update) {
-          console.log(update);
           const player = getPlayer(update.player as string);
-          const action = update.action
-          const details = update.details as DeltaDetail[typeof action]
+          const action = update.action;
 
           // notify players. TODO: not everything
           showNotification({
@@ -69,23 +77,28 @@ const Board = (props) => {
           });
 
           if (action === GameAction.ActionSetupSettlement) {
+            const details =
+              update.details as DeltaDetail[GameAction.ActionSetupSettlement];
+
             setSpots((prevSpots) =>
               prevSpots.map((spot) =>
-                spot.id === details. { ...spot, owner: update.player } : spot
+                spot.id === details.newSettlement
+                  ? { ...spot, owner: player.socketId as string }
+                  : spot
               )
             );
           } else if (update?.action === GameAction.ActionSetupRoad) {
-            // Update roads state
-            setRoads((prevRoads) => [
-              ...prevRoads,
-              {
-                id: update.roadId,
-                owner: update.player,
-                position: update.position,
-              },
-            ]);
-          }
+            const details =
+              update.details as DeltaDetail[GameAction.ActionSetupRoad];
 
+            setRoads((prevRoads) =>
+              prevRoads.map((road) =>
+                road.id === details.newRoad.id
+                  ? { ...road, owner: player.socketId as string }
+                  : road
+              )
+            );
+          }
         }
       }
     };
@@ -98,31 +111,9 @@ const Board = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const resourceToModel = {
-    WOOD: Wood3DTile,
-    BRICK: Clay3DTile,
-    ROBBERS: Robbers3DTile,
-    ORE: Rocks3DTile,
-    SHEEP: Sheep3DTile,
-    WHEAT: Wheat3DTile,
-  };
-
-  useEffect(() => {
-    const fetchBoard = () => {
-      const boardTiles = JSON.parse(lobbyState.boardState?.tiles as string);
-      const spots = JSON.parse(lobbyState.boardState?.spots as string);
-      const roads = JSON.parse(lobbyState.boardState?.roads as string);
-      setTiles(Object.values(boardTiles));
-      setSpots(Object.values(spots));
-      setRoads(Object.values(roads));
-    };
-
-    fetchBoard();
-  }, [lobbyState]);
-
   return (
     <>
-      <group name="tiles">
+      <group name="tiles" key="tiles">
         {tiles.map((tileData, index) => {
           const TileComponent = resourceToModel[tileData.resource];
           const position: Vector3 = [
@@ -130,19 +121,10 @@ const Board = (props) => {
             0,
             tileData.position.screen.z,
           ];
-          return (
-            <>
-              {/* <Annotation
-                color={'red'}
-                position={position}
-                text={tileData.id}
-              /> */}
-              <TileComponent key={index} position={position} />;
-            </>
-          );
+          return <TileComponent key={index} position={position} />;
         })}
       </group>
-      <group name="spots">
+      <group name="spots" key="spots">
         {spots.map((spotData, index) => {
           const position: Vector3 = [
             spotData.position.screen.x,
@@ -151,44 +133,30 @@ const Board = (props) => {
           ];
 
           return (
-            <>
-              {/* <Annotation
-                color={'red'}
-                position={position}
-                text={tileData.id}
-              /> */}
-              <Spot3D
-                key={index}
-                color={getPlayer(spotData.owner as string).color}
-                owner={spotData.owner}
-                type={spotData.settlementType}
-                position={position}
-              />
-            </>
+            <Spot3D
+              key={index}
+              color={getPlayer(spotData.owner as string).color}
+              owner={spotData.owner}
+              type={spotData.settlementType}
+              position={position}
+            />
           );
         })}
       </group>
-      <group name="roads">
+      <group name="roads" key="roads">
         {roads.map((roadData, index) => {
           const position: Vector3 = [
             roadData.position.screen.x,
             roadData.position.screen.y,
             roadData.position.screen.z,
           ];
-          // console.log(roadData);
           return (
-            <>
-              {/* <Annotation
-                color={'red'}
-                position={position}
-                text={tileData.id}
-              /> */}
-              <Road3D
-                key={index}
-                yangle={roadData.position.screen.yangle}
-                position={position}
-              />
-            </>
+            <Road3D
+              key={index}
+              color={getPlayer(roadData.owner as string).color}
+              yangle={roadData.position.screen.yangle}
+              position={position}
+            />
           );
         })}
       </group>
@@ -197,3 +165,11 @@ const Board = (props) => {
 };
 
 export default Board;
+
+{
+  /* <Annotation
+  color={'red'}
+  position={position}
+  text={tileData.id}
+/> */
+}
