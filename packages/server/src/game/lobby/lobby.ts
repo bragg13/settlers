@@ -44,7 +44,7 @@ export class Lobby {
       message: `player ${client.data.username} joined the lobby`,
     });
 
-    if (this.clients.size >= this.maxClients) {
+    if (this.clients.size == this.maxClients) {
       Logger.log(`Lobby ${this.id} is full, starting game...`);
       this.instance.triggerStartGame();
     }

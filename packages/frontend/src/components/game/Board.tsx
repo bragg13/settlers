@@ -11,21 +11,10 @@ import {
   Spot,
   Tile,
 } from '@settlers/shared';
-import { Clay3DTile } from '../tiles/Clay';
-import { Robbers3DTile } from '../tiles/Robbers';
-import { Rocks3DTile } from '../tiles/Rocks';
-import { Sheep3DTile } from '../tiles/Sheep';
-import { Wheat3DTile } from '../tiles/Wheat';
-import { Wood3DTile } from '../tiles/Wood';
 import { useLobbyState } from './GameContext';
 import { Vector3 } from '@react-three/fiber';
 import { Spot3D } from '../models/Spot3D';
-import { Box, Plane } from '@react-three/drei';
-import { Sea } from '../models/Sea';
 import { Road3D } from '../models/Road3D';
-import { Annotation } from '../tiles/TileValue';
-import { useControls } from 'leva';
-import LobbyPage from '../../pages/lobby';
 import { useAtom } from 'jotai';
 import { roadsAtom, spotsAtom, tilesAtom } from '../atoms';
 import { showNotification } from '@mantine/notifications';
