@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSocketManager } from '../../hooks/useSocketManager';
 import {
+  ClientEvents,
   Delta,
+  GameAction,
+  Player,
   Road,
   ServerEvents,
   ServerPayloads,
@@ -23,6 +26,10 @@ import { Road3D } from '../models/Road3D';
 import { Annotation } from '../tiles/TileValue';
 import { useControls } from 'leva';
 import LobbyPage from '../../pages/lobby';
+import { useAtom } from 'jotai';
+import { roadsAtom, spotsAtom, tilesAtom } from '../atoms';
+import { showNotification } from '@mantine/notifications';
+import { DeltaDetail } from 'packages/shared/src/lib/common/BoardTypes';
 
 type Tile3D =
   | typeof Clay3DTile
@@ -34,15 +41,52 @@ type Tile3D =
 
 const Board = (props) => {
   const sm = useSocketManager();
-  const [deltaUpdate, setDeltaUpdate] = useState<Delta>(null);
+  const [tiles, setTiles] = useAtom(tilesAtom);
+  const [spots, setSpots] = useAtom(spotsAtom);
+  const [roads, setRoads] = useAtom(roadsAtom);
+  const { lobbyState } = useLobbyState();
+
+  const getPlayer = (player: string): Player => {
+    const pg = lobbyState.players.find((el) => {
+      return el.socketId === player;
+    });
+    return pg!;
+  };
 
   useEffect(() => {
     const onDeltaUpdate = (data: ServerPayloads[ServerEvents.DeltaUpdate]) => {
       for (const update of data) {
-        // TBI
-        console.log(
-          `player ${update?.player} has performed action ${update?.action}`
-        );
+        if (update) {
+          console.log(update);
+          const player = getPlayer(update.player as string);
+          const action = update.action
+          const details = update.details as DeltaDetail[typeof action]
+
+          // notify players. TODO: not everything
+          showNotification({
+            message: `${player.username} performed ${action}`,
+            color: player.color,
+          });
+
+          if (action === GameAction.ActionSetupSettlement) {
+            setSpots((prevSpots) =>
+              prevSpots.map((spot) =>
+                spot.id === details. { ...spot, owner: update.player } : spot
+              )
+            );
+          } else if (update?.action === GameAction.ActionSetupRoad) {
+            // Update roads state
+            setRoads((prevRoads) => [
+              ...prevRoads,
+              {
+                id: update.roadId,
+                owner: update.player,
+                position: update.position,
+              },
+            ]);
+          }
+
+        }
       }
     };
 
@@ -62,29 +106,19 @@ const Board = (props) => {
     SHEEP: Sheep3DTile,
     WHEAT: Wheat3DTile,
   };
-  const ref = useRef();
-  const [tiles, setTiles] = useState<Tile[]>([]);
-  const [spots, setSpots] = useState<Spot[]>([]);
-  const [roads, setRoads] = useState<Road[]>([]);
-  const { lobbyState } = useLobbyState();
 
   useEffect(() => {
-    if (lobbyState !== null) {
-      const boardTiles = JSON.parse(lobbyState.boardState.tiles);
-      const spots = JSON.parse(lobbyState.boardState.spots);
-      const roads = JSON.parse(lobbyState.boardState.roads);
+    const fetchBoard = () => {
+      const boardTiles = JSON.parse(lobbyState.boardState?.tiles as string);
+      const spots = JSON.parse(lobbyState.boardState?.spots as string);
+      const roads = JSON.parse(lobbyState.boardState?.roads as string);
       setTiles(Object.values(boardTiles));
       setSpots(Object.values(spots));
       setRoads(Object.values(roads));
-    }
-  }, [lobbyState]);
+    };
 
-  const getPlayerColor = (player: string): string => {
-    const pg = lobbyState.players.find((el) => {
-      return el.socketId === player;
-    });
-    return pg ? pg.color : 'gray';
-  };
+    fetchBoard();
+  }, [lobbyState]);
 
   return (
     <>
@@ -125,7 +159,7 @@ const Board = (props) => {
               /> */}
               <Spot3D
                 key={index}
-                color={getPlayerColor(spotData.owner as string)}
+                color={getPlayer(spotData.owner as string).color}
                 owner={spotData.owner}
                 type={spotData.settlementType}
                 position={position}

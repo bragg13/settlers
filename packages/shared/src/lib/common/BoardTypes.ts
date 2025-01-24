@@ -60,9 +60,42 @@ export type Tile = {
 
 export type Resource = 'WOOD' | 'BRICK' | 'SHEEP' | 'WHEAT' | 'ORE' | 'ROBBERS';
 
+// delta updates
+export type DeltaDetail = {
+  [GameAction.ActionSetupSettlement]: {
+    newSettlement: Spot['id'];
+    adjacent: Array<Spot['id']>;
+  };
+
+  [GameAction.ActionSetupRoad]: {
+    newRoad: Road;
+  };
+
+  [GameAction.ActionDiceRoll]: {
+    dice: Array<number>;
+  };
+
+  [GameAction.ActionMoveRobber]: { placeholder: number };
+  [GameAction.ActionRobPlayer]: { placeholder: number };
+
+  // turn
+  [GameAction.ActionBuildSettlement]: { placeholder: number };
+  [GameAction.ActionBuildCity]: { placeholder: number };
+  [GameAction.ActionBuildRoad]: { placeholder: number };
+  [GameAction.ActionInitTrade]: { placeholder: number };
+  [GameAction.ActionEndTurn]: { placeholder: number };
+
+  // trade
+  [GameAction.ActionAcceptTrade]: { placeholder: number };
+  [GameAction.ActionDeclineTrade]: { placeholder: number };
+};
+
+// delta details can be any of the above
+type DeltaDetailUnion = DeltaDetail[keyof DeltaDetail];
+
 export type Delta = {
   action: GameAction;
   player: Socket['id'];
-  details: unknown;
+  details: DeltaDetailUnion;
   timestamp: number;
 } | null;

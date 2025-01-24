@@ -24,14 +24,7 @@ export type ServerPayloads = {
       | undefined;
   };
   [ServerEvents.DeltaUpdate]: Delta[];
-  // newSettlements: Spot[] | null;
-  // newRoads: Road[] | null;
-  // newResources: Map<
-  //   Resource,
-  //   { player: Socket['id']; amount: number }
-  // > | null;
-  // rolledDice: number[];
-  // ...
+
   [ServerEvents.AvailableActions]: {
     availableActions: string[];
     buildableSpots: Spot[] | null;
