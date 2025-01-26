@@ -2,22 +2,18 @@ import { Delta, Road, Spot, State, Tile } from '@settlers/shared';
 // import { Socket } from 'socket.io';
 
 export interface GameConfiguration {
-  map_board: MapBoardConfiguration;
+  map_board: MapBoardConfiguration | null;
   instance: InstanceConfiguration;
   turn_system: TurnSystemConfiguration;
   game_fsm: GameFSMConfiguration;
 }
 
+// it's easier to save/load everything as a string with JSON.stringify
 export interface MapBoardConfiguration {
-  spots: Map<Spot['id'], Spot>;
-  tiles: Map<Tile['id'], Tile>;
-  roads: Map<Road['id'], Road>;
-  deltas: Delta[];
-  roadsGraph: {
-    [from: Spot['id']]: {
-      [to: Spot['id']]: Road['id'];
-    };
-  };
+  spots: string;
+  tiles: string;
+  roads: string;
+  deltas: string;
 }
 
 export interface InstanceConfiguration {

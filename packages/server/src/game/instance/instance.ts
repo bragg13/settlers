@@ -68,9 +68,9 @@ export class Instance {
   public triggerStartGame(config_path: string | null = null): void {
     // add some checks if the lobby size is equal to the config size etc.
     // right now, it's free for all lol
-    let config: GameConfiguration = config_path
+    const config: GameConfiguration = config_path
       ? ConfigManager.loadConfigurationFromFile(config_path)
-      : ConfigManager.getEmptyConfiguration();
+      : ConfigManager.getEmptyConfiguration(this.lobby.clients.size);
 
     this.turns = new TurnSystem(
       this.lobby, // this is for players, I will have to deal with it later

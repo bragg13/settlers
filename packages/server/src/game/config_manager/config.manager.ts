@@ -1,34 +1,27 @@
 import { GameConfiguration } from './types';
 
 export class ConfigManager {
-  public static getEmptyConfiguration(): GameConfiguration {
+  public static getEmptyConfiguration(nplayers: number): GameConfiguration {
     return {
-      map_board: {
-        spots: new Map(),
-        tiles: new Map(),
-        roads: new Map(),
-        deltas: [],
-        roadsGraph: {},
-      },
+      map_board: null,
       instance: {
-        hasStarted: false,
+        hasStarted: true,
         hasEnded: false,
         isPaused: false,
       },
       turn_system: {
         currentPlayerIndex: 0,
-        players: [],
         currentRound: 0,
       },
       game_fsm: {
-        state: 'some_state',
-        setupSteps: [],
+        state: 'SETUP',
+        setupSteps: new Array(nplayers).fill(0),
       },
     };
   }
 
   public static loadConfigurationFromFile(path: string): GameConfiguration {
-    return {};
+    return this.getEmptyConfiguration(4);
   }
 
   public static saveConfigToFile() {}
