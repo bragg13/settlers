@@ -1,11 +1,8 @@
 import {
   ClientPayloads,
   GameAction,
-  Road,
   ServerEvents,
   ServerPayloads,
-  Spot,
-  Tile,
 } from '@settlers/shared';
 import { Lobby } from '../lobby/lobby';
 import { AuthenticatedSocket } from '../types';
@@ -20,10 +17,8 @@ export class Instance {
   public hasStarted = false;
   public hasEnded = false;
   public isPaused = false;
-  public currentRound = 0;
   private board: MapBoard = new MapBoard();
   private fsm: GameFSM = new GameFSM();
-  public players: Socket['id'][] = [];
   public turns: TurnSystem;
 
   constructor(public readonly lobby: Lobby) {}

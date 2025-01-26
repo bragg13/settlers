@@ -4,7 +4,7 @@ import { Lobby } from '../lobby/lobby';
 export class TurnSystem {
   private currentPlayerIndex = 0;
   private currentRound = 0;
-  public players: Socket['id'][];
+  public players: Socket['id'][] = [];
 
   constructor(private readonly lobby: Lobby) {
     this.players = Array.from(this.lobby.clients.keys());
@@ -25,7 +25,7 @@ export class TurnSystem {
     if (this.currentPlayerIndex >= this.lobby.maxClients) {
       this.currentPlayerIndex = 0;
     }
-    this.currentRound++;
+    this.currentRound++; // TODO well about this...
     this.lobby.dispatchLobbyState();
 
     console.log(`Player ${this.getCurrentPlayer()} is playing next`);

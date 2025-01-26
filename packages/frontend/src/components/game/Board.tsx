@@ -1,15 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSocketManager } from '../../hooks/useSocketManager';
 import {
-  ClientEvents,
-  Delta,
   GameAction,
   Player,
-  Road,
   ServerEvents,
   ServerPayloads,
-  Spot,
-  Tile,
 } from '@settlers/shared';
 import { useLobbyState } from './GameContext';
 import { Vector3 } from '@react-three/fiber';

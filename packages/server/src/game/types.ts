@@ -27,16 +27,14 @@ export interface GameConfiguration {
     };
   };
   instance: {
-    currentRound: number;
     hasStarted: boolean;
     hasEnded: boolean;
     isPaused: boolean;
   };
-  // players - should not need it
   turn_system: {
     currentPlayerIndex: number;
-    currentRound: number; // !!!!!!
-    // players
+    players: [];
+    currentRound: number;
   };
   game_fsm: {
     state: State;
