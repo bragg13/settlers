@@ -9,16 +9,17 @@ import { AuthenticatedSocket } from '../types';
 import { MapBoard } from '../map/map.board';
 import { GameFSM } from './gamefsm';
 import { Logger } from '@nestjs/common';
-import { Socket } from 'socket.io';
 import { TurnSystem } from './turnsys';
+import { ConfigManager } from '../config_manager/config.manager';
+import { GameConfiguration } from '../config_manager/types';
 
 export class Instance {
   // partita
   public hasStarted = false;
   public hasEnded = false;
   public isPaused = false;
-  private board: MapBoard = new MapBoard();
-  private fsm: GameFSM = new GameFSM();
+  private board: MapBoard;
+  private fsm: GameFSM;
   public turns: TurnSystem;
 
   constructor(public readonly lobby: Lobby) {}
@@ -64,13 +65,25 @@ export class Instance {
    *  receiving data from the clients
    *
    */
-  public triggerStartGame(): void {
-    // start the game
-    this.fsm.setupSteps = new Array(this.lobby.clients.size).fill(0);
-    this.turns = new TurnSystem(this.lobby);
+  public triggerStartGame(config_path: string | null = null): void {
+    // add some checks if the lobby size is equal to the config size etc.
+    // right now, it's free for all lol
+    let config: GameConfiguration = config_path
+      ? ConfigManager.loadConfigurationFromFile(config_path)
+      : ConfigManager.getEmptyConfiguration();
 
-    this.board.initBoard();
-    this.hasStarted = true;
+    this.turns = new TurnSystem(
+      this.lobby, // this is for players, I will have to deal with it later
+      config.turn_system
+    );
+
+    this.fsm = new GameFSM(config.game_fsm);
+
+    this.board = new MapBoard(config.map_board);
+
+    this.hasStarted = config.instance.hasStarted;
+    this.hasEnded = config.instance.hasEnded;
+    this.isPaused = config.instance.isPaused;
 
     // send available actions to the current player
     this.dispatchAvailableActions();

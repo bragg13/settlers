@@ -1,13 +1,16 @@
 import { Socket } from 'socket.io';
 import { Lobby } from '../lobby/lobby';
+import { TurnSystemConfiguration } from '../config_manager/types';
 
 export class TurnSystem {
   private currentPlayerIndex = 0;
   private currentRound = 0;
   public players: Socket['id'][] = [];
 
-  constructor(private readonly lobby: Lobby) {
-    this.players = Array.from(this.lobby.clients.keys());
+  constructor(private readonly lobby: Lobby, config: TurnSystemConfiguration) {
+    this.players = Array.from(this.lobby.clients.keys()); // this will be loaded from config
+    this.currentRound = config.currentRound;
+    this.currentPlayerIndex = config.currentPlayerIndex;
   }
 
   public getCurrentPlayer(): Socket['id'] {

@@ -22,6 +22,7 @@ import {
   spotBoardPosition,
   tileBoardPosition,
 } from 'packages/shared/src/lib/common/BoardTypes';
+import { MapBoardConfiguration } from '../config_manager/types';
 
 export class MapBoard {
   private NUM_SPOTS = 54;
@@ -41,7 +42,7 @@ export class MapBoard {
     };
   } = {};
 
-  constructor() {
+  constructor(config: MapBoardConfiguration) {
     for (let i = 1; i <= this.NUM_SPOTS; i++) {
       this.roadsGraph[i] = {};
     }
