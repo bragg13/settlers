@@ -21,9 +21,10 @@ type PageState = 'login' | 'lobby';
 
 const LobbyPage = () => {
   // debug only - automactically join lobby
-  const autoLogin = true;
+  const DEVMODE = true;
+
   useEffect(() => {
-    if (autoLogin) {
+    if (DEVMODE) {
       setFormLobby((prev) => ({
         ...prev,
         color: 'green',
@@ -253,6 +254,24 @@ const LobbyPage = () => {
       >
         {pageState === 'lobby' ? renderLobby() : renderLogin()}
       </Box>
+      {/* {DEVMODE && (
+        <TextField
+          variant="standard"
+          margin="normal"
+          name="configPath"
+          label="Config Path"
+          type="text"
+          id="configPath"
+          value={formLobby.configPath}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            e.preventDefault();
+            setFormLobby((prev) => ({
+              ...prev,
+              configPath: e.target.value,
+            }));
+          }}
+        />
+      )} */}
     </Container>
   );
 };

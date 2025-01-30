@@ -9,6 +9,12 @@ export type ClientPayloads = {
     lobbyId: string;
   };
 
+  // game
+  [ClientEvents.LoadGame]: {
+    path: string;
+  };
+  [ClientEvents.SaveGame]: null;
+
   // setup
   [GameAction.ActionSetupSettlement]: {
     spotId: Spot['id'];

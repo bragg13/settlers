@@ -1,13 +1,16 @@
 import { Socket } from 'socket.io';
 import { Lobby } from '../lobby/lobby';
+import { TurnSystemConfiguration } from '../config_manager/types';
 
 export class TurnSystem {
   private currentPlayerIndex = 0;
   private currentRound = 0;
-  public players: Socket['id'][];
+  public players: Socket['id'][] = [];
 
-  constructor(private readonly lobby: Lobby) {
-    this.players = Array.from(this.lobby.clients.keys());
+  constructor(private readonly lobby: Lobby, config: TurnSystemConfiguration) {
+    this.players = Array.from(this.lobby.clients.keys()); // this will be loaded from config
+    this.currentRound = config.currentRound;
+    this.currentPlayerIndex = config.currentPlayerIndex;
   }
 
   public getCurrentPlayer(): Socket['id'] {
@@ -25,7 +28,7 @@ export class TurnSystem {
     if (this.currentPlayerIndex >= this.lobby.maxClients) {
       this.currentPlayerIndex = 0;
     }
-    this.currentRound++;
+    this.currentRound++; // TODO well about this...
     this.lobby.dispatchLobbyState();
 
     console.log(`Player ${this.getCurrentPlayer()} is playing next`);

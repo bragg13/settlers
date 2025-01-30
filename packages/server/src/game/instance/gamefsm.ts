@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { GameAction, State } from '@settlers/shared';
+import { GameFSMConfiguration } from '../config_manager/types';
 
 export class GameFSM {
   private state: State = 'SETUP';
@@ -27,6 +28,11 @@ export class GameFSM {
   };
 
   public setupSteps: number[];
+
+  constructor(config: GameFSMConfiguration) {
+    this.state = config.state;
+    this.setupSteps = [...config.setupSteps]; // CHECK
+  }
 
   public getState(): State {
     return this.state;

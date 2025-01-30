@@ -1,30 +1,27 @@
 import {
   ClientPayloads,
   GameAction,
-  Road,
+  Player,
   ServerEvents,
   ServerPayloads,
-  Spot,
-  Tile,
 } from '@settlers/shared';
 import { Lobby } from '../lobby/lobby';
 import { AuthenticatedSocket } from '../types';
 import { MapBoard } from '../map/map.board';
 import { GameFSM } from './gamefsm';
 import { Logger } from '@nestjs/common';
-import { Socket } from 'socket.io';
 import { TurnSystem } from './turnsys';
+import { ConfigManager } from '../config_manager/config.manager';
+import { GameConfiguration } from '../config_manager/types';
 
 export class Instance {
   // partita
   public hasStarted = false;
   public hasEnded = false;
   public isPaused = false;
-  public currentRound = 0;
-  private board: MapBoard = new MapBoard();
-  private fsm: GameFSM = new GameFSM();
-  public players: Socket['id'][] = [];
-  public turns: TurnSystem;
+  private board: MapBoard; // TODO private/public?
+  public fsm: GameFSM; // TODO private/public?
+  public turns: TurnSystem; // TODO private/public?
 
   constructor(public readonly lobby: Lobby) {}
 
@@ -69,16 +66,53 @@ export class Instance {
    *  receiving data from the clients
    *
    */
-  public triggerStartGame(): void {
-    // start the game
-    this.fsm.setupSteps = new Array(this.lobby.clients.size).fill(0);
-    this.turns = new TurnSystem(this.lobby);
+  public triggerStartGame(config_path: string | null = null): void {
+    // add some checks if the lobby size is equal to the config size etc.
+    // right now, it's free for all lol
+    const config: GameConfiguration = config_path
+      ? ConfigManager.loadConfigurationFromFile(config_path)
+      : ConfigManager.getEmptyConfiguration(this.lobby.clients.size);
 
-    this.board.initBoard();
-    this.hasStarted = true;
+    const socketsMapping: {
+      [key: AuthenticatedSocket['id']]: AuthenticatedSocket['id'];
+    } = {};
+
+    if (config.players) {
+      // associate new socketIds with old ones through username
+      // TODO: this can result in error if there isnt a match in username
+      const players: Player[] = Array.from(this.lobby.clients.values()).map(
+        (client) => ({
+          username: client.data.username,
+          color: client.data.color,
+          socketId: client.id,
+        })
+      );
+
+      for (const old of config.players) {
+        const newPlayer: Player = players.find(
+          (el) => el.username == old.username
+        );
+        socketsMapping[old.socketId] = newPlayer.socketId;
+      }
+    }
+
+    this.turns = new TurnSystem(
+      this.lobby, // this is for players, I will have to deal with it later
+      config.turn_system
+    );
+
+    this.fsm = new GameFSM(config.game_fsm);
+
+    this.board = new MapBoard(config.map_board, socketsMapping);
+
+    this.hasStarted = config.instance.hasStarted;
+    this.hasEnded = config.instance.hasEnded;
+    this.isPaused = config.instance.isPaused;
 
     // send available actions to the current player
+    this.lobby.dispatchLobbyState();
     this.dispatchAvailableActions();
+    console.log(`loaded game from ${config_path}`);
   }
 
   public getBoard(): {
@@ -187,4 +221,8 @@ export class Instance {
 
   // public onBuildRoad() { }
   // public onBuildSettlement() { }
+
+  public onSaveGameRequest() {
+    ConfigManager.saveConfigToFile(this);
+  }
 }

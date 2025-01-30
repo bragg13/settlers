@@ -22,6 +22,8 @@ import {
   spotBoardPosition,
   tileBoardPosition,
 } from 'packages/shared/src/lib/common/BoardTypes';
+import { MapBoardConfiguration } from '../config_manager/types';
+import { AuthenticatedSocket } from '../types';
 
 export class MapBoard {
   private NUM_SPOTS = 54;
@@ -29,9 +31,9 @@ export class MapBoard {
   private Y_ROAD = 0.18;
   private Y_TILE = 0;
   private HEX_SIZE = 0.6;
-  public spots: Map<Spot['id'], Spot> = new Map<Spot['id'], Spot>();
-  public tiles: Map<Tile['id'], Tile> = new Map<Tile['id'], Tile>();
-  public roads: Map<Road['id'], Road> = new Map<Road['id'], Road>();
+  public spots: Map<Spot['id'], Spot>;
+  public tiles: Map<Tile['id'], Tile>;
+  public roads: Map<Road['id'], Road>;
   deltas: Delta[] = [];
 
   // potrebbe essere overkill, basta l'id e non l'intera road
@@ -41,9 +43,44 @@ export class MapBoard {
     };
   } = {};
 
-  constructor() {
+  constructor(
+    config: MapBoardConfiguration,
+    socketsMapping: {
+      [key: AuthenticatedSocket['id']]: AuthenticatedSocket['id'];
+    }
+  ) {
+    // init roads graph
     for (let i = 1; i <= this.NUM_SPOTS; i++) {
       this.roadsGraph[i] = {};
+    }
+
+    if (!config) {
+      this.initBoard();
+    } else {
+      const tiles = JSON.parse(config.tiles);
+      this.tiles = new Map<Tile['id'], Tile>();
+      for (const tile of Object.keys(tiles)) {
+        this.tiles.set(parseInt(tile), tiles[tile]);
+      }
+
+      const roads = JSON.parse(config.roads);
+      this.roads = new Map<Road['id'], Road>();
+      for (const roadId of Object.keys(roads)) {
+        const road: Road = roads[roadId];
+        // replace old owner's socketId with new one through our mapping
+        if (road.owner) road.owner = socketsMapping[road.owner];
+        this.roads.set(parseInt(roadId), road);
+      }
+
+      const spots = JSON.parse(config.spots);
+      this.spots = new Map<Spot['id'], Spot>();
+      for (const spotId of Object.keys(spots)) {
+        const spot: Spot = spots[spotId];
+        // replace old owner's socketId with new one through our mapping
+        if (spot.owner) spot.owner = socketsMapping[spot.owner];
+        this.spots.set(parseInt(spotId), spot);
+      }
+      // this.deltas = [...JSON.parse(config.deltas)];
     }
   }
 
@@ -178,6 +215,10 @@ export class MapBoard {
 
   // main initialisation function for the board
   public initBoard(): void {
+    this.spots = new Map<Spot['id'], Spot>();
+    this.tiles = new Map<Tile['id'], Tile>();
+    this.roads = new Map<Road['id'], Road>();
+
     // initialise the 'graph' part of the board aka spots/roads
     const tilesCoordinates = board_coordinates['tiles'];
     const spotsCoordinates = board_coordinates['spots'];
@@ -244,8 +285,9 @@ export class MapBoard {
     Logger.log('Board initialised');
   }
 
+  // TBI
   public getAdjacentSpots(spot_id: Spot['id']): Array<Spot['id']> {
-    const r = Object.keys(this.roadsGraph[spot_id]);
+    // const r = Object.keys(this.roadsGraph[spot_id]);
     return [];
   }
 
