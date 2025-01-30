@@ -1,6 +1,7 @@
 import {
   ClientPayloads,
   GameAction,
+  Player,
   ServerEvents,
   ServerPayloads,
 } from '@settlers/shared';
@@ -18,9 +19,9 @@ export class Instance {
   public hasStarted = false;
   public hasEnded = false;
   public isPaused = false;
-  private board: MapBoard;
-  private fsm: GameFSM;
-  public turns: TurnSystem;
+  private board: MapBoard; // TODO private/public?
+  public fsm: GameFSM; // TODO private/public?
+  public turns: TurnSystem; // TODO private/public?
 
   constructor(public readonly lobby: Lobby) {}
 
@@ -72,6 +73,29 @@ export class Instance {
       ? ConfigManager.loadConfigurationFromFile(config_path)
       : ConfigManager.getEmptyConfiguration(this.lobby.clients.size);
 
+    const socketsMapping: {
+      [key: AuthenticatedSocket['id']]: AuthenticatedSocket['id'];
+    } = {};
+
+    if (config.players) {
+      // associate new socketIds with old ones through username
+      // TODO: this can result in error if there isnt a match in username
+      const players: Player[] = Array.from(this.lobby.clients.values()).map(
+        (client) => ({
+          username: client.data.username,
+          color: client.data.color,
+          socketId: client.id,
+        })
+      );
+
+      for (const old of config.players) {
+        const newPlayer: Player = players.find(
+          (el) => el.username == old.username
+        );
+        socketsMapping[old.socketId] = newPlayer.socketId;
+      }
+    }
+
     this.turns = new TurnSystem(
       this.lobby, // this is for players, I will have to deal with it later
       config.turn_system
@@ -79,14 +103,16 @@ export class Instance {
 
     this.fsm = new GameFSM(config.game_fsm);
 
-    this.board = new MapBoard(config.map_board);
+    this.board = new MapBoard(config.map_board, socketsMapping);
 
     this.hasStarted = config.instance.hasStarted;
     this.hasEnded = config.instance.hasEnded;
     this.isPaused = config.instance.isPaused;
 
     // send available actions to the current player
+    this.lobby.dispatchLobbyState();
     this.dispatchAvailableActions();
+    console.log(`loaded game from ${config_path}`);
   }
 
   public getBoard(): {
@@ -195,4 +221,8 @@ export class Instance {
 
   // public onBuildRoad() { }
   // public onBuildSettlement() { }
+
+  public onSaveGameRequest() {
+    ConfigManager.saveConfigToFile(this);
+  }
 }

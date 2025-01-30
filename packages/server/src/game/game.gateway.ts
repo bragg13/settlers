@@ -66,6 +66,7 @@ export class GameGateway
     return true;
   }
 
+  // lobby
   @SubscribeMessage(ClientEvents.LobbyJoin)
   onLobbyJoin(client: AuthenticatedSocket, data: LobbyJoinDto): void {
     client.data.username = data.username;
@@ -76,6 +77,21 @@ export class GameGateway
   @SubscribeMessage(ClientEvents.LobbyLeave)
   onLobbyLeave(client: AuthenticatedSocket): void {
     client.data.lobby?.removeClient(client);
+  }
+
+  // game
+  @SubscribeMessage(ClientEvents.SaveGame)
+  onSaveGameRequest(client: AuthenticatedSocket): void {
+    client.data.lobby?.instance.onSaveGameRequest();
+  }
+  @SubscribeMessage(ClientEvents.LoadGame)
+  onLoadGameRequest(
+    client: AuthenticatedSocket,
+    data: ClientPayloads[ClientEvents.LoadGame]
+  ): void {
+    // trigger the game start specifying the path of the save
+    // TODO: will have to send the savefile directly I guess
+    client.data.lobby?.instance.triggerStartGame(data.path);
   }
 
   // setup

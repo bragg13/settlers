@@ -1,7 +1,7 @@
 import { Button, Stack, Typography } from '@mui/material';
 import { useSocketManager } from '../hooks/useSocketManager';
 import { Canvas } from '@react-three/fiber';
-import { GameAction } from '@settlers/shared';
+import { ClientEvents, GameAction } from '@settlers/shared';
 import {
   useAvailableActions,
   useLobbyState,
@@ -60,7 +60,7 @@ const PlayPage = () => {
             });
           }}
         >
-          build settlement
+          settlement
         </Button>
 
         <Button
@@ -80,7 +80,7 @@ const PlayPage = () => {
             });
           }}
         >
-          build road
+          road
         </Button>
         <Button
           id="rollDice"
@@ -96,7 +96,33 @@ const PlayPage = () => {
             sm.emit({ event: GameAction.ActionDiceRoll, data: {} });
           }}
         >
-          roll dice
+          dice
+        </Button>
+        <Button
+          id="saveGame"
+          variant="contained"
+          color="info"
+          // will be disabled if you are not the owner of the game i guess
+          onClick={() => {
+            sm.emit({ event: ClientEvents.SaveGame });
+          }}
+        >
+          save
+        </Button>
+        <Button
+          id="loadGame"
+          variant="contained"
+          color="info"
+          // will be disabled if you are not the owner of the game i guess
+          onClick={() => {
+            const path = prompt(
+              'path:',
+              '/Users/andrea/Desktop/settlers/saves/game123.json'
+            );
+            sm.emit({ event: ClientEvents.LoadGame, data: { path } });
+          }}
+        >
+          load
         </Button>
       </Stack>
       {/* <Chat /> */}

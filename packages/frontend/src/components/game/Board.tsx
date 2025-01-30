@@ -31,8 +31,8 @@ const Board = (props) => {
     setTiles(Object.values(boardTiles));
     setSpots(Object.values(spots));
     setRoads(Object.values(roads));
-    console.log('First board initialisation done.');
-  }, []);
+    console.log('Board updated.');
+  }, [lobbyState.boardState?.roads, lobbyState.boardState?.spots]);
 
   const getPlayer = (player: string): Player => {
     const pg = lobbyState.players.find((el) => {

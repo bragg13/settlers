@@ -3,6 +3,10 @@ export enum ClientEvents {
   LobbyJoin = 'client.lobbyJoin',
   LobbyLeave = 'client.lobbyleave',
 
+  // game
+  SaveGame = 'client.saveGame',
+  LoadGame = 'client.loadGame',
+
   // chat
   ChatMessage = 'client.chatMessage',
 }

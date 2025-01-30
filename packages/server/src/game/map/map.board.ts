@@ -23,6 +23,7 @@ import {
   tileBoardPosition,
 } from 'packages/shared/src/lib/common/BoardTypes';
 import { MapBoardConfiguration } from '../config_manager/types';
+import { AuthenticatedSocket } from '../types';
 
 export class MapBoard {
   private NUM_SPOTS = 54;
@@ -42,7 +43,12 @@ export class MapBoard {
     };
   } = {};
 
-  constructor(config: MapBoardConfiguration) {
+  constructor(
+    config: MapBoardConfiguration,
+    socketsMapping: {
+      [key: AuthenticatedSocket['id']]: AuthenticatedSocket['id'];
+    }
+  ) {
     // init roads graph
     for (let i = 1; i <= this.NUM_SPOTS; i++) {
       this.roadsGraph[i] = {};
@@ -51,10 +57,30 @@ export class MapBoard {
     if (!config) {
       this.initBoard();
     } else {
-      this.tiles = new Map(JSON.parse(config.tiles));
-      this.spots = new Map(JSON.parse(config.spots));
-      this.roads = new Map(JSON.parse(config.roads));
-      this.deltas = [...JSON.parse(config.deltas)];
+      const tiles = JSON.parse(config.tiles);
+      this.tiles = new Map<Tile['id'], Tile>();
+      for (const tile of Object.keys(tiles)) {
+        this.tiles.set(parseInt(tile), tiles[tile]);
+      }
+
+      const roads = JSON.parse(config.roads);
+      this.roads = new Map<Road['id'], Road>();
+      for (const roadId of Object.keys(roads)) {
+        const road: Road = roads[roadId];
+        // replace old owner's socketId with new one through our mapping
+        if (road.owner) road.owner = socketsMapping[road.owner];
+        this.roads.set(parseInt(roadId), road);
+      }
+
+      const spots = JSON.parse(config.spots);
+      this.spots = new Map<Spot['id'], Spot>();
+      for (const spotId of Object.keys(spots)) {
+        const spot: Spot = spots[spotId];
+        // replace old owner's socketId with new one through our mapping
+        if (spot.owner) spot.owner = socketsMapping[spot.owner];
+        this.spots.set(parseInt(spotId), spot);
+      }
+      // this.deltas = [...JSON.parse(config.deltas)];
     }
   }
 
@@ -259,8 +285,9 @@ export class MapBoard {
     Logger.log('Board initialised');
   }
 
+  // TBI
   public getAdjacentSpots(spot_id: Spot['id']): Array<Spot['id']> {
-    const r = Object.keys(this.roadsGraph[spot_id]);
+    // const r = Object.keys(this.roadsGraph[spot_id]);
     return [];
   }
 
