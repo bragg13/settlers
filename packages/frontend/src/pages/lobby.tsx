@@ -21,7 +21,7 @@ type PageState = 'login' | 'lobby';
 
 const LobbyPage = () => {
   // debug only - automactically join lobby
-  const DEVMODE = true;
+  const DEVMODE = false;
 
   useEffect(() => {
     if (DEVMODE) {

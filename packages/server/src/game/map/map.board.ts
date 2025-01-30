@@ -198,7 +198,6 @@ export class MapBoard {
     const epsilon = 0.00000000001;
     if (Math.abs(x1 - x2) < epsilon) {
       yangle = 3.14 / 2;
-      console.log('|');
     } else if (x1 < x2 && z1 < z2) {
       yangle = 2.62;
     } else {

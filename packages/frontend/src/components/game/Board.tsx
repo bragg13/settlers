@@ -6,7 +6,7 @@ import {
   ServerEvents,
   ServerPayloads,
 } from '@settlers/shared';
-import { useLobbyState } from './GameContext';
+import { useAvailableActions, useLobbyState } from './GameContext';
 import { Vector3 } from '@react-three/fiber';
 import { Spot3D } from '../models/Spot3D';
 import { Road3D } from '../models/Road3D';
@@ -16,12 +16,14 @@ import { showNotification } from '@mantine/notifications';
 import { DeltaDetail } from 'packages/shared/src/lib/common/BoardTypes';
 import { resourceToModel } from './types';
 
-const Board = (props) => {
+const Board = () => {
   const sm = useSocketManager();
   const [tiles, setTiles] = useAtom(tilesAtom);
   const [spots, setSpots] = useAtom(spotsAtom);
   const [roads, setRoads] = useAtom(roadsAtom);
   const { lobbyState } = useLobbyState();
+  const isPlaying = sm.getSocketId() === lobbyState.currentPlayer;
+  const { availableActions } = useAvailableActions();
 
   // init board tiles and stuff
   useEffect(() => {
@@ -115,14 +117,20 @@ const Board = (props) => {
             spotData.position.screen.y,
             spotData.position.screen.z,
           ];
+          // TODO selectable = isPlaying && availableAction && in selectableSpots
+          const clickable =
+            isPlaying &&
+            availableActions.availableActions.includes(
+              GameAction.ActionSetupSettlement
+            );
 
           return (
             <Spot3D
               key={index}
               color={getPlayer(spotData.owner as string).color}
-              owner={spotData.owner}
-              type={spotData.settlementType}
+              spotData={spotData}
               position={position}
+              clickable={clickable}
             />
           );
         })}

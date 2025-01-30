@@ -89,7 +89,6 @@ export class Lobby {
 
     if (this.instance.hasStarted) {
       data['boardState'] = { ...this.instance.getBoard() };
-      console.log(data['boardState'].spots);
     }
 
     this.dispatchToLobby(ServerEvents.LobbyState, data);
