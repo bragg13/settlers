@@ -285,21 +285,27 @@ export class MapBoard {
   }
 
   // TBI
-  public getAdjacentSpots(spot_id: Spot['id']): Array<Spot['id']> {
+  public getAdjacentSpots(spot_id: Spot['id']): Array<Spot> {
     // const r = Object.keys(this.roadsGraph[spot_id]);
     return [];
   }
 
   // building roads and settlements
-  public getAvailableSpots = (player: Socket['id']): Array<Spot> => {
+  public getAvailableSpots = (player: Socket['id']): Array<Spot['id']> => {
     const settlementsBuiltByPlayer = this.getSettlementsBuiltBy(player);
     if (settlementsBuiltByPlayer.length < 2) {
-      return this.getSettlementsBuiltBy(null);
+      // ritorno solo gli ID
+      return this.getSettlementsBuiltBy(null).map((spot) => spot.id);
     }
-    return bfs_spots(settlementsBuiltByPlayer, this.spots, this.roads, player);
+    return bfs_spots(
+      settlementsBuiltByPlayer,
+      this.spots,
+      this.roads,
+      player
+    ).map((spot) => spot.id);
   };
 
-  public getAvailableRoads = (player: Socket['id']): Array<Road> => {
+  public getAvailableRoads = (player: Socket['id']): Array<Road['id']> => {
     const settlementsBuiltByPlayer = this.getSettlementsBuiltBy(player);
     console.log('settl built by player:');
     console.log(settlementsBuiltByPlayer);
@@ -309,7 +315,7 @@ export class MapBoard {
       this.roadsGraph,
       this.roads,
       player
-    );
+    ).map((road) => road.id);
   };
 
   // there is for sure a better way
@@ -335,8 +341,12 @@ export class MapBoard {
     });
 
     // adjacent spots are not buildable anymore
-    const adjs = this.getAdjacentSpots(spot_id);
+    const adjs: Array<Spot> = this.getAdjacentSpots(spot_id);
     for (const adj of adjs) {
+      this.spots.set(adj.id, {
+        ...adj,
+        settlementType: 'unbuildable',
+      });
       console.log(adj);
     }
 
@@ -345,6 +355,7 @@ export class MapBoard {
       player,
       details: {
         newSettlement: spot_id,
+        // serve??
         adjacent: [...adjs],
       },
       timestamp: Date.now(),

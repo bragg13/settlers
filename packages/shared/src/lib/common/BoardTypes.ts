@@ -26,7 +26,7 @@ export type tileBoardPosition = {
 };
 
 // settlement
-export type SettlementType = 'city' | 'village' | null;
+export type SettlementType = 'city' | 'village' | 'unbuildable' | null;
 export type Spot = {
   id: number;
   settlementType: SettlementType;
@@ -64,7 +64,7 @@ export type Resource = 'WOOD' | 'BRICK' | 'SHEEP' | 'WHEAT' | 'ORE' | 'ROBBERS';
 export type DeltaDetail = {
   [GameAction.ActionSetupSettlement]: {
     newSettlement: Spot['id'];
-    adjacent: Array<Spot['id']>;
+    adjacent: Array<Spot>;
   };
 
   [GameAction.ActionSetupRoad]: {

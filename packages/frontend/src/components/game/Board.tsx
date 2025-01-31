@@ -8,7 +8,7 @@ import {
   ServerPayloads,
 } from '@settlers/shared';
 import { useAvailableActions, useLobbyState } from './GameContext';
-import { Vector3 } from '@react-three/fiber';
+import { render, Vector3 } from '@react-three/fiber';
 import { Spot3D } from '../models/Spot3D';
 import { Road3D } from '../models/Road3D';
 import { useAtom } from 'jotai';
@@ -20,6 +20,12 @@ import {
   Spot,
 } from 'packages/shared/src/lib/common/BoardTypes';
 import { resourceToModel } from './types';
+import {
+  roadRender,
+  spawnRoadRender,
+  spawnSpotRender,
+  spotRender,
+} from './Board.elements';
 
 const Board = () => {
   const sm = useSocketManager();
@@ -54,7 +60,7 @@ const Board = () => {
         } as Player);
   };
 
-  const onClicked = (
+  const onSpawnableClicked = (
     event: GameAction,
     data:
       | ClientPayloads[GameAction.ActionSetupSettlement]
@@ -66,6 +72,15 @@ const Board = () => {
       data,
     });
   };
+
+  const canSpawnSpot =
+    isPlaying &&
+    availableActions.availableActions.includes(
+      GameAction.ActionSetupSettlement
+    );
+  const canSpawnRoad =
+    isPlaying &&
+    availableActions.availableActions.includes(GameAction.ActionSetupRoad);
 
   useEffect(() => {
     const onDeltaUpdate = (data: ServerPayloads[ServerEvents.DeltaUpdate]) => {
@@ -128,54 +143,32 @@ const Board = () => {
           return <TileComponent key={index} position={position} />;
         })}
       </group>
+
+      {/* Towns, cities, and roads */}
+      {/* Shouldnt cause many re-renders but lets see */}
       <group name="spots" key="spots">
         {spots.map((spotData, index) => {
-          const position: Vector3 = [
-            spotData.position.screen.x,
-            spotData.position.screen.y,
-            spotData.position.screen.z,
-          ];
-          // TODO selectable = isPlaying && availableAction && in selectableSpots
-          const clickable =
-            isPlaying &&
-            availableActions.availableActions.includes(
-              GameAction.ActionSetupSettlement
-            );
+          // if can be built by this player
+          const spawnable =
+            canSpawnSpot && spotData.settlementType !== 'unbuildable';
+          availableActions.buildableSpots?.includes(spotData.id);
+          const renderable = spotData.owner !== null;
+          if (renderable) console.log(spotData.id);
 
-          return (
-            <Spot3D
-              key={index}
-              color={getPlayer(spotData.owner as string).color}
-              spotData={spotData}
-              position={position}
-              clickable={clickable}
-              onClicked={onClicked}
-            />
-          );
+          if (!spawnable && !renderable) return null;
+          return spotRender(spotData, index, onSpawnableClicked, getPlayer);
         })}
       </group>
       <group name="roads" key="roads">
         {roads.map((roadData, index) => {
-          const position: Vector3 = [
-            roadData.position.screen.x,
-            roadData.position.screen.y,
-            roadData.position.screen.z,
-          ];
-          const clickable =
-            isPlaying &&
-            availableActions.availableActions.includes(
-              GameAction.ActionSetupRoad
-            );
-          return (
-            <Road3D
-              key={index}
-              color={getPlayer(roadData.owner as string).color}
-              roadData={roadData}
-              position={position}
-              clickable={clickable}
-              onClicked={onClicked}
-            />
-          );
+          // if can be built by this player
+          const spawnable =
+            canSpawnRoad &&
+            availableActions.buildableRoads?.includes(roadData.id);
+          const renderable = roadData.owner !== null;
+
+          if (!spawnable && !renderable) return null;
+          return roadRender(roadData, index, onSpawnableClicked, getPlayer);
         })}
       </group>
     </>
@@ -191,3 +184,5 @@ export default Board;
   text={tileData.id}
 /> */
 }
+
+// todo: instead of having everything under spots, also because later in the game they become useless, have separate lists for spots and towns

@@ -23,7 +23,7 @@ const PlayPage = () => {
       <Canvas
         dpr={[1, 2]} // Limit pixel ratio
         performance={{ min: 0.5 }} // Allow frame drops
-        frameloop="demand" // Only render when needed
+        // frameloop="demand" // Only render when needed
         gl={{
           powerPreference: 'high-performance',
           antialias: false, // Disable antialiasing in dev
@@ -32,9 +32,9 @@ const PlayPage = () => {
       >
         <MainScene />
         <Stats />
-        <axesHelper args={[15]} />
+        {/* <axesHelper args={[15]} /> */}
         <OrbitControls />
-        <gridHelper />
+        {/* <gridHelper /> */}
       </Canvas>
 
       <Stack direction="row" gap={4}>

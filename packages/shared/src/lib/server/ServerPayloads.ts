@@ -27,9 +27,9 @@ export type ServerPayloads = {
 
   [ServerEvents.AvailableActions]: {
     availableActions: string[];
-    buildableSpots: Spot[] | null;
-    buildableRoads: Road[] | null;
-    buildableCities: Spot[] | null;
+    buildableSpots: Spot['id'][] | null;
+    buildableRoads: Road['id'][] | null;
+    buildableCities: Spot['id'][] | null;
     // ...
   };
   [ServerEvents.ChatMessage]: {
