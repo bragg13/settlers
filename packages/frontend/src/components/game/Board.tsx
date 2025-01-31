@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSocketManager } from '../../hooks/useSocketManager';
 import {
+  ClientPayloads,
   GameAction,
   Player,
   ServerEvents,
@@ -13,7 +14,11 @@ import { Road3D } from '../models/Road3D';
 import { useAtom } from 'jotai';
 import { roadsAtom, spotsAtom, tilesAtom } from '../atoms';
 import { showNotification } from '@mantine/notifications';
-import { DeltaDetail } from 'packages/shared/src/lib/common/BoardTypes';
+import {
+  DeltaDetail,
+  Road,
+  Spot,
+} from 'packages/shared/src/lib/common/BoardTypes';
 import { resourceToModel } from './types';
 
 const Board = () => {
@@ -47,6 +52,19 @@ const Board = () => {
           socketId: '',
           color: 'white',
         } as Player);
+  };
+
+  const onClicked = (
+    event: GameAction,
+    data:
+      | ClientPayloads[GameAction.ActionSetupSettlement]
+      | ClientPayloads[GameAction.ActionSetupRoad]
+  ) => {
+    console.log(event, data);
+    sm.emit({
+      event,
+      data,
+    });
   };
 
   useEffect(() => {
@@ -131,6 +149,7 @@ const Board = () => {
               spotData={spotData}
               position={position}
               clickable={clickable}
+              onClicked={onClicked}
             />
           );
         })}
@@ -142,12 +161,19 @@ const Board = () => {
             roadData.position.screen.y,
             roadData.position.screen.z,
           ];
+          const clickable =
+            isPlaying &&
+            availableActions.availableActions.includes(
+              GameAction.ActionSetupRoad
+            );
           return (
             <Road3D
               key={index}
               color={getPlayer(roadData.owner as string).color}
-              yangle={roadData.position.screen.yangle}
+              roadData={roadData}
               position={position}
+              clickable={clickable}
+              onClicked={onClicked}
             />
           );
         })}
