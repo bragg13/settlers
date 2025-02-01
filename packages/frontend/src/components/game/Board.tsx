@@ -1,27 +1,40 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSocketManager } from '../../hooks/useSocketManager';
 import {
+  ClientPayloads,
   GameAction,
   Player,
   ServerEvents,
   ServerPayloads,
 } from '@settlers/shared';
-import { useLobbyState } from './GameContext';
-import { Vector3 } from '@react-three/fiber';
+import { useAvailableActions, useLobbyState } from './GameContext';
+import { render, Vector3 } from '@react-three/fiber';
 import { Spot3D } from '../models/Spot3D';
 import { Road3D } from '../models/Road3D';
 import { useAtom } from 'jotai';
 import { roadsAtom, spotsAtom, tilesAtom } from '../atoms';
 import { showNotification } from '@mantine/notifications';
-import { DeltaDetail } from 'packages/shared/src/lib/common/BoardTypes';
+import {
+  DeltaDetail,
+  Road,
+  Spot,
+} from 'packages/shared/src/lib/common/BoardTypes';
 import { resourceToModel } from './types';
+import {
+  roadRender,
+  spawnRoadRender,
+  spawnSpotRender,
+  spotRender,
+} from './Board.elements';
 
-const Board = (props) => {
+const Board = () => {
   const sm = useSocketManager();
   const [tiles, setTiles] = useAtom(tilesAtom);
   const [spots, setSpots] = useAtom(spotsAtom);
   const [roads, setRoads] = useAtom(roadsAtom);
   const { lobbyState } = useLobbyState();
+  const isPlaying = sm.getSocketId() === lobbyState.currentPlayer;
+  const { availableActions } = useAvailableActions();
 
   // init board tiles and stuff
   useEffect(() => {
@@ -46,6 +59,28 @@ const Board = (props) => {
           color: 'white',
         } as Player);
   };
+
+  const onSpawnableClicked = (
+    event: GameAction,
+    data:
+      | ClientPayloads[GameAction.ActionSetupSettlement]
+      | ClientPayloads[GameAction.ActionSetupRoad]
+  ) => {
+    console.log(event, data);
+    sm.emit({
+      event,
+      data,
+    });
+  };
+
+  const canSpawnSpot =
+    isPlaying &&
+    availableActions.availableActions.includes(
+      GameAction.ActionSetupSettlement
+    );
+  const canSpawnRoad =
+    isPlaying &&
+    availableActions.availableActions.includes(GameAction.ActionSetupRoad);
 
   useEffect(() => {
     const onDeltaUpdate = (data: ServerPayloads[ServerEvents.DeltaUpdate]) => {
@@ -108,40 +143,32 @@ const Board = (props) => {
           return <TileComponent key={index} position={position} />;
         })}
       </group>
+
+      {/* Towns, cities, and roads */}
+      {/* Shouldnt cause many re-renders but lets see */}
       <group name="spots" key="spots">
         {spots.map((spotData, index) => {
-          const position: Vector3 = [
-            spotData.position.screen.x,
-            spotData.position.screen.y,
-            spotData.position.screen.z,
-          ];
+          // if can be built by this player
+          const spawnable =
+            canSpawnSpot && spotData.settlementType !== 'unbuildable';
+          availableActions.buildableSpots?.includes(spotData.id);
+          const renderable = spotData.owner !== null;
+          if (renderable) console.log(spotData.id);
 
-          return (
-            <Spot3D
-              key={index}
-              color={getPlayer(spotData.owner as string).color}
-              owner={spotData.owner}
-              type={spotData.settlementType}
-              position={position}
-            />
-          );
+          if (!spawnable && !renderable) return null;
+          return spotRender(spotData, index, onSpawnableClicked, getPlayer);
         })}
       </group>
       <group name="roads" key="roads">
         {roads.map((roadData, index) => {
-          const position: Vector3 = [
-            roadData.position.screen.x,
-            roadData.position.screen.y,
-            roadData.position.screen.z,
-          ];
-          return (
-            <Road3D
-              key={index}
-              color={getPlayer(roadData.owner as string).color}
-              yangle={roadData.position.screen.yangle}
-              position={position}
-            />
-          );
+          // if can be built by this player
+          const spawnable =
+            canSpawnRoad &&
+            availableActions.buildableRoads?.includes(roadData.id);
+          const renderable = roadData.owner !== null;
+
+          if (!spawnable && !renderable) return null;
+          return roadRender(roadData, index, onSpawnableClicked, getPlayer);
         })}
       </group>
     </>
@@ -157,3 +184,5 @@ export default Board;
   text={tileData.id}
 /> */
 }
+
+// todo: instead of having everything under spots, also because later in the game they become useless, have separate lists for spots and towns

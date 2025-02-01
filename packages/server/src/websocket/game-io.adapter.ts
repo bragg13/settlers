@@ -13,7 +13,6 @@ export class GameIoAdapter extends IoAdapter {
   };
 
   createIOServer(port: number, options?: ServerOptions): any {
-    console.log('createIOServer');
     return super.createIOServer(port, { ...this.options, ...options });
   }
 
