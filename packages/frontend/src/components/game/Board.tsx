@@ -8,9 +8,7 @@ import {
   ServerPayloads,
 } from '@settlers/shared';
 import { useAvailableActions, useLobbyState } from './GameContext';
-import { render, Vector3 } from '@react-three/fiber';
-import { Spot3D } from '../models/Spot3D';
-import { Road3D } from '../models/Road3D';
+import { Vector3 } from '@react-three/fiber';
 import { useAtom } from 'jotai';
 import { roadsAtom, spotsAtom, tilesAtom } from '../atoms';
 import { showNotification } from '@mantine/notifications';
@@ -20,12 +18,7 @@ import {
   Spot,
 } from 'packages/shared/src/lib/common/BoardTypes';
 import { resourceToModel } from './types';
-import {
-  roadRender,
-  spawnRoadRender,
-  spawnSpotRender,
-  spotRender,
-} from './Board.elements';
+import { roadRender, spotRender } from './Board.elements';
 
 const Board = () => {
   const sm = useSocketManager();

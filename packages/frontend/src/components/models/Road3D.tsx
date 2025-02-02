@@ -5,6 +5,7 @@ import { ClientPayloads, GameAction, Road, Spot } from '@settlers/shared';
 import { Vector3 } from '@react-three/fiber';
 import { useRef } from 'react';
 import { animated, useSpring } from '@react-spring/three';
+import { Mesh } from 'three';
 
 export function Road3D(props: Road3DProps) {
   // a road is visible if it's about to be selected, or if it had an owner
