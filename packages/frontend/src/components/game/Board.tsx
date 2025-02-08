@@ -19,6 +19,7 @@ import {
 } from 'packages/shared/src/lib/common/BoardTypes';
 import { resourceToModel } from './types';
 import { roadRender, spotRender } from './Board.elements';
+import { TileValue } from '../tiles/TileValue';
 
 const Board = () => {
   const sm = useSocketManager();
@@ -133,7 +134,12 @@ const Board = () => {
             0,
             tileData.position.screen.z,
           ];
-          return <TileComponent key={index} position={position} />;
+          return (
+            <>
+              <TileValue color={'red'} position={position} text={tileData.id} />
+              <TileComponent key={index} position={position} />;
+            </>
+          );
         })}
       </group>
 
@@ -169,13 +175,5 @@ const Board = () => {
 };
 
 export default Board;
-
-{
-  /* <Annotation
-  color={'red'}
-  position={position}
-  text={tileData.id}
-/> */
-}
 
 // todo: instead of having everything under spots, also because later in the game they become useless, have separate lists for spots and towns

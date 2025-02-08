@@ -1,8 +1,10 @@
 import { Html } from '@react-three/drei';
+import { Vector3 } from '@react-three/fiber';
 
-export function Annotation({ color, position, text }) {
+export function TileValue(props) {
   // const { camera } = useThree();
   // const [selected, setSelected] = useState(-1);
+  const { text, position, color } = props;
 
   return (
     <Html key={text} position={[position[0], position[1], position[2]]}>
@@ -92,3 +94,8 @@ export function Annotation({ color, position, text }) {
 //     </Canvas>
 //   );
 // }
+export interface TileValueProps {
+  color: string;
+  position: Vector3;
+  text: string;
+}
