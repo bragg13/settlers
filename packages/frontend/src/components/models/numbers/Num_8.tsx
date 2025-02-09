@@ -5,7 +5,7 @@ Files: num_8.glb [409.64KB] > /Users/andrea/Desktop/settlers/packages/frontend/p
 */
 
 import * as THREE from 'three';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { GLTF } from 'three-stdlib';
 
@@ -20,10 +20,16 @@ type GLTFResult = GLTF & {
   animations: GLTFAction[];
 };
 
-export function Model(props: JSX.IntrinsicElements['group']) {
+export function Num_8(props: JSX.IntrinsicElements['group']) {
   const { nodes, materials } = useGLTF(
     '/models/numbers/num_8.glb'
   ) as GLTFResult;
+
+  useEffect(() => {
+    // Modify the existing material's color
+    (nodes.Text005.material as THREE.MeshStandardMaterial).color.set('coral');
+  }, [nodes.Text005.material]);
+
   return (
     <group {...props} dispose={null}>
       <mesh
@@ -32,14 +38,6 @@ export function Model(props: JSX.IntrinsicElements['group']) {
         receiveShadow
         geometry={nodes.Text005.geometry}
         material={nodes.Text005.material}
-        rotation={[Math.PI / 2, 0, 0]}
-      />
-      <mesh
-        name="Text006"
-        castShadow
-        receiveShadow
-        geometry={nodes.Text006.geometry}
-        material={materials['materiale.006']}
         rotation={[Math.PI / 2, 0, 0]}
       />
     </group>

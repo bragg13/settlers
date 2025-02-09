@@ -50,15 +50,33 @@ export type Road = {
 // tiles
 export type Tile = {
   id: number;
-  resource: Resource;
-  value: number;
+  resource: TileResource;
+  value: TileValue;
   position: {
     screen: screenPosition;
     board: tileBoardPosition;
   };
 };
 
-export type Resource = 'WOOD' | 'BRICK' | 'SHEEP' | 'WHEAT' | 'ORE' | 'ROBBERS';
+export type TileResource =
+  | 'WOOD'
+  | 'BRICK'
+  | 'SHEEP'
+  | 'WHEAT'
+  | 'ORE'
+  | 'ROBBERS';
+export type TileValue =
+  | '2'
+  | '3'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | '10'
+  | '11'
+  | '12';
 
 // delta updates
 export type DeltaDetail = {

@@ -12,14 +12,9 @@ import { Vector3 } from '@react-three/fiber';
 import { useAtom } from 'jotai';
 import { roadsAtom, spotsAtom, tilesAtom } from '../atoms';
 import { showNotification } from '@mantine/notifications';
-import {
-  DeltaDetail,
-  Road,
-  Spot,
-} from 'packages/shared/src/lib/common/BoardTypes';
-import { resourceToModel } from './types';
+import { DeltaDetail } from 'packages/shared/src/lib/common/BoardTypes';
+import { tileResourceToModel, tileValueToModel } from './types';
 import { roadRender, spotRender } from './Board.elements';
-import { TileValue } from '../tiles/TileValue';
 
 const Board = () => {
   const sm = useSocketManager();
@@ -35,7 +30,12 @@ const Board = () => {
     const boardTiles = JSON.parse(lobbyState.boardState?.tiles as string);
     const spots = JSON.parse(lobbyState.boardState?.spots as string);
     const roads = JSON.parse(lobbyState.boardState?.roads as string);
-    setTiles(Object.values(boardTiles));
+
+    // initialise tiles only once, at beginning of game
+    if (tiles.length === 0) {
+      console.log('spand');
+      setTiles(Object.values(boardTiles));
+    }
     setSpots(Object.values(spots));
     setRoads(Object.values(roads));
     console.log('Board updated.');
@@ -128,18 +128,30 @@ const Board = () => {
     <>
       <group name="tiles" key="tiles">
         {tiles.map((tileData, index) => {
-          const TileComponent = resourceToModel[tileData.resource];
+          const TileComponent = tileResourceToModel[tileData.resource];
+          const value = `NUM${tileData.value}`;
           const position: Vector3 = [
             tileData.position.screen.x,
             0,
             tileData.position.screen.z,
           ];
-          return (
-            <>
-              <TileValue color={'red'} position={position} text={tileData.id} />
-              <TileComponent key={index} position={position} />;
-            </>
-          );
+          if (value in tileValueToModel) {
+            const tileValueScale: Vector3 = [0.4, 0.4, 0.3];
+            const TileValueComponent =
+              tileValueToModel[value as keyof typeof tileValueToModel];
+            return (
+              <>
+                <TileValueComponent
+                  key={index + 20}
+                  position={[position[0], position[1] + 0.5, position[2]]}
+                  scale={tileValueScale}
+                />
+                <TileComponent key={index} position={position} />;
+              </>
+            );
+          }
+          console.log('ciao');
+          return <TileComponent key={index} position={position} />;
         })}
       </group>
 

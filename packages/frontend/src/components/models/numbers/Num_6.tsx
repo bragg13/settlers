@@ -5,7 +5,7 @@ Files: num_6.glb [504.6KB] > /Users/andrea/Desktop/settlers/packages/frontend/pu
 */
 
 import * as THREE from 'three';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { GLTF } from 'three-stdlib';
 
@@ -22,11 +22,16 @@ type GLTFResult = GLTF & {
   animations: GLTFAction[];
 };
 
-// this is just a number 6 flipped lol
-export function Num_9(props: JSX.IntrinsicElements['group']) {
+export function Num_6(props: JSX.IntrinsicElements['group']) {
   const { nodes, materials } = useGLTF(
     '/models/numbers/num_6.glb'
   ) as GLTFResult;
+
+  useEffect(() => {
+    // Modify the existing material's color
+    (nodes.Text004.material as THREE.MeshStandardMaterial).color.set('coral');
+  }, [nodes.Text004.material]);
+
   return (
     <group {...props} dispose={null}>
       <mesh
@@ -35,7 +40,7 @@ export function Num_9(props: JSX.IntrinsicElements['group']) {
         receiveShadow
         geometry={nodes.Text004.geometry}
         material={nodes.Text004.material}
-        rotation={[Math.PI / 2, Math.PI, 0]}
+        rotation={[Math.PI / 2, 0, 0]}
       />
     </group>
   );

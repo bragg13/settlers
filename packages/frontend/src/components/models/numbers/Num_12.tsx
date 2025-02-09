@@ -17,7 +17,7 @@ type GLTFResult = GLTF & {
   animations: GLTFAction[];
 };
 
-export function Model(props: JSX.IntrinsicElements['group']) {
+export function Num_12(props: JSX.IntrinsicElements['group']) {
   const { nodes, materials } = useGLTF(
     '/models/numbers/num_12.glb'
   ) as GLTFResult;

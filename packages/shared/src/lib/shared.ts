@@ -16,7 +16,7 @@ import { ServerExceptionResponse, Player } from './server/types';
 // common
 import {
   SettlementType,
-  Resource,
+  TileResource,
   Road,
   Spot,
   Tile,
@@ -40,7 +40,7 @@ export {
 
   // common
   type SettlementType,
-  type Resource,
+  type TileResource,
   type Road,
   type Spot,
   type Tile,

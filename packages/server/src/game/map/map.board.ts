@@ -5,7 +5,7 @@ import { Logger } from '@nestjs/common';
 import {
   Delta,
   GameAction,
-  Resource,
+  TileResource,
   Road,
   ServerEvents,
   ServerPayloads,
@@ -21,6 +21,7 @@ import {
   screenPosition,
   spotBoardPosition,
   tileBoardPosition,
+  TileValue,
 } from 'packages/shared/src/lib/common/BoardTypes';
 import { MapBoardConfiguration } from '../config_manager/types';
 import { AuthenticatedSocket } from '../types';
@@ -226,14 +227,16 @@ export class MapBoard {
     const tileValues = board_constants['tileValues'].sort(
       () => Math.random() - 0.5
     );
-    const tileResources: Resource[] = board_constants['resourceValues'].sort(
-      () => Math.random() - 0.5
-    ) as Resource[];
+    const tileResources: TileResource[] = board_constants[
+      'resourceValues'
+    ].sort(() => Math.random() - 0.5) as TileResource[];
     let valueIndex = 0;
 
     for (let i = 0; i < tileResources.length; i++) {
-      const tileValue =
-        tileResources[i] === 'ROBBERS' ? 7 : tileValues[valueIndex++];
+      const tileValue: TileValue =
+        tileResources[i] === 'ROBBERS'
+          ? ('7' as TileValue)
+          : (tileValues[valueIndex++].toString() as TileValue);
       const tilePositionBoard: tileBoardPosition =
         tilesCoordinates[(i + 1).toString()];
       const tilePositionScreen: screenPosition =

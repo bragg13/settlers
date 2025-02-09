@@ -22,7 +22,7 @@ type GLTFResult = GLTF & {
   animations: GLTFAction[];
 };
 
-export function Model(props: JSX.IntrinsicElements['group']) {
+export function Num_3(props: JSX.IntrinsicElements['group']) {
   const { nodes, materials } = useGLTF(
     '/models/numbers/num_3.glb'
   ) as GLTFResult;
@@ -34,22 +34,6 @@ export function Model(props: JSX.IntrinsicElements['group']) {
         receiveShadow
         geometry={nodes.Text001.geometry}
         material={nodes.Text001.material}
-        rotation={[Math.PI / 2, 0, 0]}
-      />
-      <mesh
-        name="Text002"
-        castShadow
-        receiveShadow
-        geometry={nodes.Text002.geometry}
-        material={materials['materiale.002']}
-        rotation={[Math.PI / 2, 0, 0]}
-      />
-      <mesh
-        name="Text004"
-        castShadow
-        receiveShadow
-        geometry={nodes.Text004.geometry}
-        material={materials['materiale.004']}
         rotation={[Math.PI / 2, 0, 0]}
       />
     </group>
