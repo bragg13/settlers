@@ -31,6 +31,10 @@ export class Lobby {
   }
 
   public addClient(client: AuthenticatedSocket): void {
+    // DEBUG: so we always have same usernames
+    if (this.clients.size == this.maxClients - 1) {
+      client.data.username = 'braggino';
+    }
     // add client
     this.clients.set(client.id, client);
 

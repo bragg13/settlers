@@ -23,7 +23,7 @@ const PlayPage = () => {
       <Canvas
         dpr={[1, 2]} // Limit pixel ratio
         performance={{ min: 0.5 }} // Allow frame drops
-        // frameloop="demand" // Only render when needed
+        frameloop="demand" // Only render when needed
         gl={{
           powerPreference: 'high-performance',
           antialias: false, // Disable antialiasing in dev
@@ -38,50 +38,15 @@ const PlayPage = () => {
       </Canvas>
 
       <Stack direction="row" gap={4}>
-        <Typography sx={{ backgroundColor: playerInformation.color }}>
+        <Typography
+          sx={{
+            borderBottom: '3px solid',
+            alignContent: 'end',
+            borderColor: playerInformation.color,
+          }}
+        >
           {playerInformation.username}
         </Typography>
-        <Button
-          id="buildSettelment"
-          variant="contained"
-          color="primary"
-          disabled={
-            !isPlaying ||
-            !availableActions.availableActions.includes(
-              GameAction.ActionSetupSettlement
-            )
-          }
-          onClick={() => {
-            sm.emit({
-              event: GameAction.ActionSetupSettlement,
-              data: {
-                spotId: 1,
-              },
-            });
-          }}
-        >
-          settlement
-        </Button>
-
-        <Button
-          id="buildRoad"
-          disabled={
-            !isPlaying ||
-            !availableActions.availableActions.includes(
-              GameAction.ActionSetupRoad
-            )
-          }
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            sm.emit({
-              event: GameAction.ActionSetupRoad,
-              data: { spot1: 1, spot2: 5, roadId: 2 },
-            });
-          }}
-        >
-          road
-        </Button>
         <Button
           id="rollDice"
           variant="contained"

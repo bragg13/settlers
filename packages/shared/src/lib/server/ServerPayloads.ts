@@ -1,4 +1,4 @@
-import { Delta, GameAction, Resource, Road, Spot, Tile } from '../shared';
+import { Delta, GameAction, TileResource, Road, Spot, Tile } from '../shared';
 import { Socket } from 'socket.io';
 import { ServerEvents } from './ServerEvents';
 import { Player } from './types';

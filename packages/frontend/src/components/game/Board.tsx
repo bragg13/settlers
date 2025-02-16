@@ -8,24 +8,13 @@ import {
   ServerPayloads,
 } from '@settlers/shared';
 import { useAvailableActions, useLobbyState } from './GameContext';
-import { render, Vector3 } from '@react-three/fiber';
-import { Spot3D } from '../models/Spot3D';
-import { Road3D } from '../models/Road3D';
+import { Vector3 } from '@react-three/fiber';
 import { useAtom } from 'jotai';
 import { roadsAtom, spotsAtom, tilesAtom } from '../atoms';
 import { showNotification } from '@mantine/notifications';
-import {
-  DeltaDetail,
-  Road,
-  Spot,
-} from 'packages/shared/src/lib/common/BoardTypes';
-import { resourceToModel } from './types';
-import {
-  roadRender,
-  spawnRoadRender,
-  spawnSpotRender,
-  spotRender,
-} from './Board.elements';
+import { DeltaDetail } from 'packages/shared/src/lib/common/BoardTypes';
+import { tileResourceToModel, tileValueToModel } from './types';
+import { roadRender, spotRender } from './Board.elements';
 
 const Board = () => {
   const sm = useSocketManager();
@@ -41,7 +30,12 @@ const Board = () => {
     const boardTiles = JSON.parse(lobbyState.boardState?.tiles as string);
     const spots = JSON.parse(lobbyState.boardState?.spots as string);
     const roads = JSON.parse(lobbyState.boardState?.roads as string);
-    setTiles(Object.values(boardTiles));
+
+    // initialise tiles only once, at beginning of game
+    if (tiles.length === 0) {
+      console.log('spand');
+      setTiles(Object.values(boardTiles));
+    }
     setSpots(Object.values(spots));
     setRoads(Object.values(roads));
     console.log('Board updated.');
@@ -134,12 +128,28 @@ const Board = () => {
     <>
       <group name="tiles" key="tiles">
         {tiles.map((tileData, index) => {
-          const TileComponent = resourceToModel[tileData.resource];
+          const TileComponent = tileResourceToModel[tileData.resource];
+          const value = `NUM${tileData.value}`;
           const position: Vector3 = [
             tileData.position.screen.x,
             0,
             tileData.position.screen.z,
           ];
+          if (value in tileValueToModel) {
+            const tileValueScale: Vector3 = [0.4, 0.4, 0.3];
+            const TileValueComponent =
+              tileValueToModel[value as keyof typeof tileValueToModel];
+            return (
+              <>
+                <TileValueComponent
+                  key={index + 20}
+                  position={[position[0], position[1] + 0.5, position[2]]}
+                  scale={tileValueScale}
+                />
+                <TileComponent key={index} position={position} />;
+              </>
+            );
+          }
           return <TileComponent key={index} position={position} />;
         })}
       </group>
@@ -176,13 +186,5 @@ const Board = () => {
 };
 
 export default Board;
-
-{
-  /* <Annotation
-  color={'red'}
-  position={position}
-  text={tileData.id}
-/> */
-}
 
 // todo: instead of having everything under spots, also because later in the game they become useless, have separate lists for spots and towns

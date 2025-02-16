@@ -5,7 +5,7 @@ import { Logger } from '@nestjs/common';
 import {
   Delta,
   GameAction,
-  Resource,
+  TileResource,
   Road,
   ServerEvents,
   ServerPayloads,
@@ -21,6 +21,7 @@ import {
   screenPosition,
   spotBoardPosition,
   tileBoardPosition,
+  TileValue,
 } from 'packages/shared/src/lib/common/BoardTypes';
 import { MapBoardConfiguration } from '../config_manager/types';
 import { AuthenticatedSocket } from '../types';
@@ -226,14 +227,16 @@ export class MapBoard {
     const tileValues = board_constants['tileValues'].sort(
       () => Math.random() - 0.5
     );
-    const tileResources: Resource[] = board_constants['resourceValues'].sort(
-      () => Math.random() - 0.5
-    ) as Resource[];
+    const tileResources: TileResource[] = board_constants[
+      'resourceValues'
+    ].sort(() => Math.random() - 0.5) as TileResource[];
     let valueIndex = 0;
 
     for (let i = 0; i < tileResources.length; i++) {
-      const tileValue =
-        tileResources[i] === 'ROBBERS' ? 7 : tileValues[valueIndex++];
+      const tileValue: TileValue =
+        tileResources[i] === 'ROBBERS'
+          ? ('7' as TileValue)
+          : (tileValues[valueIndex++].toString() as TileValue);
       const tilePositionBoard: tileBoardPosition =
         tilesCoordinates[(i + 1).toString()];
       const tilePositionScreen: screenPosition =
@@ -284,10 +287,9 @@ export class MapBoard {
     Logger.log('Board initialised');
   }
 
-  // TBI
-  public getAdjacentSpots(spot_id: Spot['id']): Array<Spot> {
-    // const r = Object.keys(this.roadsGraph[spot_id]);
-    return [];
+  public getAdjacentSpots(spot_id: Spot['id']): Array<Spot['id']> {
+    const r = Object.keys(this.roadsGraph[spot_id]);
+    return r.map((x) => parseInt(x));
   }
 
   // building roads and settlements
@@ -341,9 +343,10 @@ export class MapBoard {
     });
 
     // adjacent spots are not buildable anymore
-    const adjs: Array<Spot> = this.getAdjacentSpots(spot_id);
-    for (const adj of adjs) {
-      this.spots.set(adj.id, {
+    const adjs: Array<Spot['id']> = this.getAdjacentSpots(spot_id);
+    for (const adjId of adjs) {
+      const adj = this.spots.get(adjId);
+      this.spots.set(adjId, {
         ...adj,
         settlementType: 'unbuildable',
       });
