@@ -82,7 +82,7 @@ export type TileValue =
 export type DeltaDetail = {
   [GameAction.ActionSetupSettlement]: {
     newSettlement: Spot['id'];
-    adjacent: Array<Spot>;
+    adjacent: Array<Spot['id']>;
   };
 
   [GameAction.ActionSetupRoad]: {

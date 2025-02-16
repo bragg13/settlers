@@ -287,10 +287,9 @@ export class MapBoard {
     Logger.log('Board initialised');
   }
 
-  // TBI
-  public getAdjacentSpots(spot_id: Spot['id']): Array<Spot> {
-    // const r = Object.keys(this.roadsGraph[spot_id]);
-    return [];
+  public getAdjacentSpots(spot_id: Spot['id']): Array<Spot['id']> {
+    const r = Object.keys(this.roadsGraph[spot_id]);
+    return r.map((x) => parseInt(x));
   }
 
   // building roads and settlements
@@ -344,9 +343,10 @@ export class MapBoard {
     });
 
     // adjacent spots are not buildable anymore
-    const adjs: Array<Spot> = this.getAdjacentSpots(spot_id);
-    for (const adj of adjs) {
-      this.spots.set(adj.id, {
+    const adjs: Array<Spot['id']> = this.getAdjacentSpots(spot_id);
+    for (const adjId of adjs) {
+      const adj = this.spots.get(adjId);
+      this.spots.set(adjId, {
         ...adj,
         settlementType: 'unbuildable',
       });

@@ -150,7 +150,6 @@ const Board = () => {
               </>
             );
           }
-          console.log('ciao');
           return <TileComponent key={index} position={position} />;
         })}
       </group>
