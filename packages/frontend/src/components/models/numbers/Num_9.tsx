@@ -25,7 +25,7 @@ type GLTFResult = GLTF & {
 // this is just a number 6 flipped lol
 export function Num_9(props: JSX.IntrinsicElements['group']) {
   const { nodes, materials } = useGLTF(
-    '/models/numbers/num_6.glb'
+    '/models/numbers/num_9.glb'
   ) as GLTFResult;
   return (
     <group {...props} dispose={null}>
@@ -41,4 +41,4 @@ export function Num_9(props: JSX.IntrinsicElements['group']) {
   );
 }
 
-useGLTF.preload('/models/numbers/num_6.glb');
+useGLTF.preload('/models/numbers/num_9.glb');
