@@ -57,7 +57,7 @@ const LobbyPage = () => {
     color: 'green',
     lobbyId: '123',
   });
-  const { playerInformation, setPlayerInformation } = usePlayerInformation();
+  const { setPlayerInformation } = usePlayerInformation();
   const [pageState, setPageState] = useState<PageState>('login');
   const [players, setPlayers] = useState<{ username: string; color: string }[]>(
     []
@@ -110,6 +110,7 @@ const LobbyPage = () => {
       username: formLobby.username,
       color: formLobby.color,
       socketId: sm.getSocketId(),
+      resources: null,
     });
     setPageState('lobby');
   }

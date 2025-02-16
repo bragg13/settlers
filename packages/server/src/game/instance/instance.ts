@@ -85,6 +85,7 @@ export class Instance {
           username: client.data.username,
           color: client.data.color,
           socketId: client.id,
+          resources: { ...client.data.resources },
         })
       );
 
@@ -111,6 +112,26 @@ export class Instance {
 
     // send available actions to the current player
     this.lobby.dispatchLobbyState();
+
+    for (const player of this.lobby.clients.values()) {
+      const playerInfo: Player = {
+        resources: {
+          WOOD: 0,
+          WHEAT: 0,
+          SHEEP: 0,
+          BRICK: 0,
+          ORE: 0,
+        },
+        username: player.data.username,
+        color: player.data.color,
+        socketId: player.id,
+      };
+      this.lobby.dispatchToPlayer(
+        player.id,
+        ServerEvents.PlayerInformation,
+        playerInfo
+      );
+    }
     this.dispatchAvailableActions();
     console.log(`loaded game from ${config_path}`);
   }

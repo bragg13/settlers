@@ -30,6 +30,7 @@ export const GameContextProvider = ({ children }: { children: ReactNode }) => {
     color: '',
     socketId: '',
     username: '',
+    resources: null,
   });
 
   return (

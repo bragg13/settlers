@@ -38,6 +38,7 @@ const PlayPage = () => {
       </Canvas>
 
       <Stack direction="row" gap={4}>
+        {/* username */}
         <Typography
           sx={{
             borderBottom: '3px solid',
@@ -47,6 +48,16 @@ const PlayPage = () => {
         >
           {playerInformation.username}
         </Typography>
+
+        {/* inventory */}
+        <Typography variant="caption">
+          WOOD: {playerInformation.resources?.WOOD}
+          WHEAT: {playerInformation.resources?.WHEAT}
+          SHEEP: {playerInformation.resources?.SHEEP}
+          ORE: {playerInformation.resources?.ORE}
+          BRICK: {playerInformation.resources?.BRICK}
+        </Typography>
+
         <Button
           id="rollDice"
           variant="contained"

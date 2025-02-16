@@ -8,13 +8,14 @@ export type ServerPayloads = {
     color: string;
     message: string;
   };
+  [ServerEvents.PlayerInformation]: Player;
   [ServerEvents.LobbyState]: {
     lobbyId: string;
     hasStarted: boolean;
     hasEnded: boolean;
     currentPlayer: string;
     currentRound: number;
-    players: Array<Player>; // TODO: to remove
+    players: Array<Player>;
     boardState:
       | {
           spots: string;

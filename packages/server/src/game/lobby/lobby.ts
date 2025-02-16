@@ -87,6 +87,7 @@ export class Lobby {
         username: client.data.username,
         color: client.data.color,
         socketId: client.id,
+        resources: null,
       })),
       boardState: undefined,
     };

@@ -10,4 +10,11 @@ export type Player = {
   username: string;
   color: string;
   socketId: Socket['id'] | null | undefined;
+  resources: {
+    WOOD: number;
+    BRICK: number;
+    ORE: number;
+    SHEEP: number;
+    WHEAT: number;
+  } | null;
 };

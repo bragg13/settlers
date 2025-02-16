@@ -13,41 +13,45 @@ import {
 const GameManager = () => {
   const sm = useSocketManager();
   const { lobbyState, setLobbyState } = useLobbyState();
-  const { availableActions, setAvailableActions } = useAvailableActions();
-  const { playerInformation } = usePlayerInformation();
+  const { setAvailableActions } = useAvailableActions();
+  const { setPlayerInformation } = usePlayerInformation();
 
   useEffect(() => {
     sm.connect();
 
     const onGameMessage = (data: ServerPayloads[ServerEvents.GameMessage]) => {
-      console.log('game message', data);
       showNotification({
         message: data.message,
         color: data.color,
       });
     };
 
+    const onPlayerInformation = (
+      data: ServerPayloads[ServerEvents.PlayerInformation]
+    ) => {
+      setPlayerInformation(data);
+    };
     const onLobbyState = (data: ServerPayloads[ServerEvents.LobbyState]) => {
-      console.log('lobby state', data);
       setLobbyState(data);
     };
 
     const onAvailableActions = (
       data: ServerPayloads[ServerEvents.AvailableActions]
     ) => {
-      console.log('available actions', data);
       setAvailableActions(data);
     };
 
     sm.registerListener(ServerEvents.GameMessage, onGameMessage);
     sm.registerListener(ServerEvents.LobbyState, onLobbyState);
     sm.registerListener(ServerEvents.AvailableActions, onAvailableActions);
+    sm.registerListener(ServerEvents.PlayerInformation, onPlayerInformation);
 
     // remove listeners when dismounting
     return () => {
       sm.removeListener(ServerEvents.GameMessage, onGameMessage);
       sm.removeListener(ServerEvents.LobbyState, onLobbyState);
       sm.removeListener(ServerEvents.AvailableActions, onAvailableActions);
+      sm.removeListener(ServerEvents.PlayerInformation, onPlayerInformation);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
