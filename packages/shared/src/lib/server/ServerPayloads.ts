@@ -1,4 +1,4 @@
-import { Delta, GameAction, TileResource, Road, Spot, Tile } from '../shared';
+import { Delta, Road, Spot } from '../shared';
 import { Socket } from 'socket.io';
 import { ServerEvents } from './ServerEvents';
 import { Player } from './types';
@@ -9,6 +9,13 @@ export type ServerPayloads = {
     message: string;
   };
   [ServerEvents.PlayerInformation]: Player;
+  [ServerEvents.ResourcesGathered]: {
+    BRICK: number;
+    ORE: number;
+    SHEEP: number;
+    WHEAT: number;
+    WOOD: number;
+  };
   [ServerEvents.LobbyState]: {
     lobbyId: string;
     hasStarted: boolean;

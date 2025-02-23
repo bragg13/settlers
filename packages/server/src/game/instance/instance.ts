@@ -174,59 +174,69 @@ export class Instance {
 
   // gestire qui la logica del gioco
   // e terminare con this.lobby.dispatchLobbyState per mandare aggionramenti a tutti i client
+  public canProceedWithAction(action: GameAction) {
+    const availableActions = this.fsm.getAvailableActions(
+      this.turns.getCurrentPlayerIndex()
+    );
+    if (availableActions.includes(action)) {
+      return true;
+    } else {
+      Logger.error('Not available action');
+      return false;
+    }
+  }
+
   public onSetupSettlement(
     client: AuthenticatedSocket,
     data: ClientPayloads[GameAction.ActionSetupSettlement]
   ): void {
-    const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
-    const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
-
-    if (availableActions.includes(GameAction.ActionSetupSettlement)) {
-      this.board.buildSettlement(
-        data.spotId,
-        'village',
-        client.id,
-        GameAction.ActionSetupSettlement
-      );
-      this.fsm.setupSteps[currentPlayerIndex]++;
-      this.dispatchDeltaUpdate();
-      this.dispatchAvailableActions();
-    } else {
-      Logger.error('Not available action');
-    }
+    this.board.buildSettlement(
+      data.spotId,
+      'village',
+      client.id,
+      GameAction.ActionSetupSettlement
+    );
+    this.fsm.setupSteps[this.turns.getCurrentPlayerIndex()]++;
+    this.dispatchDeltaUpdate();
+    this.dispatchAvailableActions();
   }
 
   public onSetupRoad(
     client: AuthenticatedSocket,
     data: ClientPayloads[GameAction.ActionSetupRoad]
   ): void {
-    // this can probably become some kind of decorator
-    const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
-    const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
-
-    // check that the action is legit from this state
-    if (availableActions.includes(GameAction.ActionSetupRoad)) {
-      this.board.buildRoad(
-        data.spot1,
-        data.spot2,
-        client.id,
-        GameAction.ActionSetupRoad
-      );
-      this.fsm.setupSteps[currentPlayerIndex]++;
-      this.turns.nextTurn();
-      if (this.turns.getCurrentRound() === this.lobby.maxClients * 2) {
-        // end of setup stage
-        this.fsm.transitionTo('DICE_ROLL');
-      }
-      this.dispatchAvailableActions();
-      this.dispatchDeltaUpdate();
-    } else {
-      Logger.error('Not available action');
+    this.board.buildRoad(
+      data.spot1,
+      data.spot2,
+      client.id,
+      GameAction.ActionSetupRoad
+    );
+    this.fsm.setupSteps[this.turns.getCurrentPlayerIndex()]++;
+    this.turns.nextTurn();
+    if (this.turns.getCurrentRound() === this.lobby.maxClients * 2) {
+      // end of setup stage
+      this.fsm.transitionTo('DICE_ROLL');
     }
+    this.dispatchDeltaUpdate();
+    this.dispatchAvailableActions();
   }
+
   public onDiceRoll(client: AuthenticatedSocket, data: any): void {
-    Logger.log('diceRoll');
-    // this.fsm.transitionTo(state) // to turn?
+    const { diceResult, resourceToPlayer } = this.board.rollDice(client.id);
+    // no need to go to next turns, but lets update the FSM state
+    this.fsm.transitionTo(diceResult === 7 ? 'ROBBERS' : 'TURN');
+    this.dispatchDeltaUpdate();
+
+    // send to each player which resource they gathered
+    for (const player of this.lobby.clients.keys()) {
+      this.lobby.dispatchToPlayer(
+        player,
+        ServerEvents.ResourcesGathered,
+        resourceToPlayer[player]
+      );
+    }
+
+    this.dispatchAvailableActions();
   }
 
   public onEndTurn(client: AuthenticatedSocket): void {

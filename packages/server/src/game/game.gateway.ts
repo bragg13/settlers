@@ -100,7 +100,12 @@ export class GameGateway
     client: AuthenticatedSocket,
     data: ClientPayloads[GameAction.ActionSetupSettlement]
   ): void {
-    if (this.checkIsClientTurn(client)) {
+    if (
+      this.checkIsClientTurn(client) &&
+      client.data.lobby?.instance.canProceedWithAction(
+        GameAction.ActionSetupSettlement
+      )
+    ) {
       client.data.lobby?.instance.onSetupSettlement(client, data);
     }
   }
@@ -110,7 +115,12 @@ export class GameGateway
     client: AuthenticatedSocket,
     data: ClientPayloads[GameAction.ActionSetupRoad]
   ): void {
-    if (this.checkIsClientTurn(client)) {
+    if (
+      this.checkIsClientTurn(client) &&
+      client.data.lobby?.instance.canProceedWithAction(
+        GameAction.ActionSetupRoad
+      )
+    ) {
       client.data.lobby?.instance.onSetupRoad(client, data);
     }
   }
@@ -118,7 +128,12 @@ export class GameGateway
   // dice roll
   @SubscribeMessage(GameAction.ActionDiceRoll)
   onActionDiceRoll(client: AuthenticatedSocket): void {
-    if (this.checkIsClientTurn(client)) {
+    if (
+      this.checkIsClientTurn(client) &&
+      client.data.lobby?.instance.canProceedWithAction(
+        GameAction.ActionDiceRoll
+      )
+    ) {
       client.data.lobby?.instance.onDiceRoll(client);
     }
   }

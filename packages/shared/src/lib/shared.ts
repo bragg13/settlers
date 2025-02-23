@@ -6,7 +6,6 @@ export function shared(): string {
 import { SocketExceptions } from './server/SocketExceptions';
 import { ServerEvents } from './server/ServerEvents';
 import { ServerPayloads } from './server/ServerPayloads';
-import { ServerActionPayloadsWrapper } from './server/ServerActionPayloads';
 
 // client
 import { GameAction, ClientEvents } from './client/ClientEvents';
@@ -30,7 +29,6 @@ export {
   SocketExceptions,
   ServerEvents,
   type ServerPayloads,
-  type ServerActionPayloadsWrapper,
   type ServerExceptionResponse,
 
   // client

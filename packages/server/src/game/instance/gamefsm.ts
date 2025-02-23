@@ -5,9 +5,9 @@ import { GameFSMConfiguration } from '../config_manager/types';
 export class GameFSM {
   private state: State = 'SETUP';
   private validTransitions: { [key in State]: State[] } = {
-    SETUP: ['SETUP', 'DICE_ROLL'],
+    SETUP: ['DICE_ROLL'],
     DICE_ROLL: ['ROBBERS', 'TURN'],
-    ROBBERS: ['ROBBERS', 'TURN'],
+    ROBBERS: ['TURN'],
     TURN: ['TRADE', 'GAME_END', 'DICE_ROLL'],
     TRADE: ['TURN'],
     GAME_END: [],

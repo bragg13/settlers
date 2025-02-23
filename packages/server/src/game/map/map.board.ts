@@ -25,6 +25,7 @@ import {
 } from 'packages/shared/src/lib/common/BoardTypes';
 import { MapBoardConfiguration } from '../config_manager/types';
 import { AuthenticatedSocket } from '../types';
+import { DiceRollResult } from './types';
 
 export class MapBoard {
   private NUM_SPOTS = 54;
@@ -392,18 +393,34 @@ export class MapBoard {
     });
   }
 
-  public rollDice(player: Socket['id']): number[] {
+  public rollDice(player: Socket['id']): DiceRollResult {
     const dice = [randomInt(1, 7), randomInt(1, 7)];
+    const diceSum = dice[0] + dice[1];
+    const resourceToPlayer = {};
+    const tiles = Array.from(this.tiles.values()).filter(
+      (tile) => parseInt(tile.value) === diceSum
+    );
+    const spotsOnTiles = Array.from(this.spots.values()).filter(
+      (spot) => spot.owner !== null && spot.position.board.tile in tiles
+    );
+    console.log('tiles');
+    console.log(tiles);
+    console.log('spotsOnTiles');
+    console.log(spotsOnTiles);
 
     this.deltas.push({
       action: GameAction.ActionDiceRoll,
       player,
       details: {
         dice,
+        tiles: Array.from(tiles.keys()),
       },
       timestamp: Date.now(),
     });
 
-    return dice;
+    return {
+      diceResult: dice[0] + dice[1],
+      resourceToPlayer,
+    };
   }
 }

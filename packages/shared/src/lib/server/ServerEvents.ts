@@ -6,4 +6,5 @@ export enum ServerEvents {
   ChatMessage = 'server.chatMessage',
   BoardSetup = 'server.boardSetup',
   PlayerInformation = 'server.playerInformation',
+  ResourcesGathered = 'server.resourcesGathered',
 }
