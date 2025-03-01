@@ -18,14 +18,17 @@ export function bfs_spots(
       const t: Spot['id'] = queue.pop();
       explored[t] = true;
 
+      console.log(`popped spot with ID:${t} from queue`);
+      console.log(`spot is ${spots[t]}`);
+
       // check the town
-      if (spots[t].owner === null) availableSpots.push(t);
+      if (spots.get(t).owner === null) availableSpots.push(t);
 
       // check adjacents
-      for (const adj of Object.keys(roads[t])) {
+      for (const adj of Object.keys(roads.get(t))) {
         if (!explored[adj]) {
           // se la strada è mia -> queue
-          if (roads[t][adj].owner === player) {
+          if (roads.get(t)[adj].owner === player) {
             queue.push(parseInt(adj));
           }
         }

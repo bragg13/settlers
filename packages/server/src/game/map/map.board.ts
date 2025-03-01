@@ -81,6 +81,7 @@ export class MapBoard {
         // replace old owner's socketId with new one through our mapping
         if (spot.owner) spot.owner = socketsMapping[spot.owner];
         this.spots.set(parseInt(spotId), spot);
+        console.log(spot);
       }
       // this.deltas = [...JSON.parse(config.deltas)];
     }
@@ -96,7 +97,7 @@ export class MapBoard {
     const tileScreenPosition = this.tileBoardToScreen(tilePositionBoard);
 
     // get spot position on screen
-    const spotTileCorner = spotPositionBoard.tileCorner;
+    const spotTileCorner = spotPositionBoard.tileWithCorner.tileCorner;
     const spotPositionScreen = this.spotBoardToScreen(
       tileScreenPosition,
       spotTileCorner
@@ -252,6 +253,11 @@ export class MapBoard {
           screen: tilePositionScreen,
         },
       });
+      // console.log(
+      //   `tile ${i + 1} on ${tilePositionScreen.x} ${tilePositionScreen.y} ${
+      //     tilePositionScreen.z
+      //   }`
+      // );
     }
 
     // spots and roads - currently doing 2 for loops because
@@ -263,8 +269,9 @@ export class MapBoard {
     ) {
       const spotPositionBoard: spotBoardPosition =
         spotsCoordinates[spotId.toString()];
+      console.log(spotPositionBoard);
       const tilePositionBoard: tileBoardPosition = this.tiles.get(
-        spotPositionBoard.tile
+        spotPositionBoard.tileWithCorner.tile
       ).position.board;
       this.initSpot(spotId, tilePositionBoard, spotPositionBoard);
     }
@@ -400,8 +407,12 @@ export class MapBoard {
     const tiles = Array.from(this.tiles.values()).filter(
       (tile) => parseInt(tile.value) === diceSum
     );
+    const tilesIds = tiles.map((el) => el.id);
     const spotsOnTiles = Array.from(this.spots.values()).filter(
-      (spot) => spot.owner !== null && spot.position.board.tile in tiles
+      (spot) =>
+        spot.owner !== null &&
+        // intersection between tiles that produce and tiles of the spot
+        spot.position.board.tiles.filter((el) => tilesIds.includes(el))
     );
     console.log('tiles');
     console.log(tiles);

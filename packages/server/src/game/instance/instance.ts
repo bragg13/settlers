@@ -35,6 +35,7 @@ export class Instance {
     const currentPlayerIndex = this.turns.getCurrentPlayerIndex();
     const currentPlayer = this.turns.getCurrentPlayer();
     const availableActions = this.fsm.getAvailableActions(currentPlayerIndex);
+    console.log(`dispatching available actions for player ${currentPlayer}`);
 
     const actions: ServerPayloads[ServerEvents.AvailableActions] = {
       availableActions,

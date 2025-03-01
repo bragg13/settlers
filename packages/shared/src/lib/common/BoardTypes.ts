@@ -7,8 +7,8 @@ export type screenPosition = {
   z: number;
 };
 export type spotBoardPosition = {
-  tile: number;
-  tileCorner: number;
+  tiles: Array<Tile['id']>;
+  tileWithCorner: { tile: Tile['id']; tileCorner: number };
 };
 export type roadBoardPosition = {
   from: Spot['id'];
