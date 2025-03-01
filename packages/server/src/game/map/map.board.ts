@@ -415,12 +415,12 @@ export class MapBoard {
       (spot) =>
         spot.owner !== null &&
         // intersection between tiles that produce and tiles of the spot
-        spot.position.board.tiles.filter((el) => tilesIds.includes(el))
+        spot.position.board.tiles.filter((el) => tilesIds.includes(el)).length >
+          0
     );
-    console.log('tiles');
+    Logger.log(`Harvesting on:`);
     console.log(tiles);
-    console.log(tilesIds);
-    console.log('spotsOnTiles');
+    Logger.log('Spots that will harvest:');
     console.log(spotsOnTiles);
 
     this.deltas.push({
