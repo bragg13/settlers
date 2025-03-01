@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSocketManager } from '../../hooks/useSocketManager';
 import {
   ClientPayloads,
+  BoardAnimation,
   GameAction,
   Player,
   ServerEvents,
@@ -33,7 +34,6 @@ const Board = () => {
 
     // initialise tiles only once, at beginning of game
     if (tiles.length === 0) {
-      console.log('spand');
       setTiles(Object.values(boardTiles));
     }
     setSpots(Object.values(spots));
@@ -111,6 +111,19 @@ const Board = () => {
                   : road
               )
             );
+          } else if (update?.action === GameAction.ActionDiceRoll) {
+            const details =
+              update.details as DeltaDetail[GameAction.ActionDiceRoll];
+            setTiles((prevTiles) =>
+              prevTiles.map((tile) =>
+                tile.id in details.tiles
+                  ? { ...tile, animationsQueue: [BoardAnimation.TileRolled] }
+                  : tile
+              )
+            );
+            // for (const tile in details.tiles) {
+            //   tiles[tile].animationsQueue.push(BoardAnimation.TileRolled);
+            // }
           }
         }
       }
@@ -128,6 +141,8 @@ const Board = () => {
     <>
       <group name="tiles" key="tiles">
         {tiles.map((tileData, index) => {
+          console.log(tileData.resource);
+          console.log(tileResourceToModel[tileData.resource]);
           const TileComponent = tileResourceToModel[tileData.resource];
           const value = `NUM${tileData.value}`;
           const position: Vector3 = [

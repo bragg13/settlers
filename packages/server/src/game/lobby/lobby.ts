@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthenticatedSocket } from '../types';
 import { Instance } from '../instance/instance';
 import { Logger } from '@nestjs/common';
-import { ServerPayloads, ServerEvents } from '@settlers/shared';
+import { ServerPayloads, ServerEvents, Player } from '@settlers/shared';
 import { Chat } from '../instance/chat';
 
 /**
@@ -105,6 +105,19 @@ export class Lobby {
 
   public dispatchToCurrentPlayer<T>(event: string, data: T): void {
     this.clients.get(this.instance.turns.getCurrentPlayer()).emit(event, data);
+  }
+
+  public dispatchPlayerInformation(
+    socketId: Socket['id'],
+    event: string,
+    data: Player
+  ): void {
+    // update resources
+    this.clients.get(socketId).data.resources = {
+      ...data.resources,
+    };
+
+    this.dispatchToPlayer(socketId, event, data);
   }
 
   public dispatchToPlayer<T>(

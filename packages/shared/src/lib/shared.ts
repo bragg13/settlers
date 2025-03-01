@@ -8,8 +8,13 @@ import { ServerEvents } from './server/ServerEvents';
 import { ServerPayloads } from './server/ServerPayloads';
 
 // client
-import { GameAction, ClientEvents } from './client/ClientEvents';
+import {
+  GameAction,
+  ClientEvents,
+  BoardAnimation,
+} from './client/ClientEvents';
 import { ClientPayloads } from './client/ClientPayloads';
+import { ClientTile } from './client/ClientBoardTypes';
 import { ServerExceptionResponse, Player } from './server/types';
 
 // common
@@ -33,7 +38,9 @@ export {
 
   // client
   ClientEvents,
+  BoardAnimation,
   type ClientPayloads,
+  type ClientTile,
   type Player,
 
   // common

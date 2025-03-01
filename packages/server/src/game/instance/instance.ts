@@ -126,7 +126,8 @@ export class Instance {
         color: player.data.color,
         socketId: player.id,
       };
-      this.lobby.dispatchToPlayer(
+
+      this.lobby.dispatchPlayerInformation(
         player.id,
         ServerEvents.PlayerInformation,
         playerInfo

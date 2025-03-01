@@ -36,3 +36,7 @@ export enum GameAction {
   ActionAcceptTrade = 'client.actionAcceptTrade',
   ActionDeclineTrade = 'client.actionDeclineTrade',
 }
+
+export enum BoardAnimation {
+  TileRolled = 'client.tileRolledAnimation',
+}

@@ -69,8 +69,8 @@ export class ConfigManager {
         color: client.data.color,
         socketId: client.id,
         resources: {
-          BRICK: client.data.resources['BRICKS'],
-          ORE: client.data.resources['BRICKS'],
+          BRICK: client.data.resources['BRICK'],
+          ORE: client.data.resources['ORE'],
           SHEEP: client.data.resources['SHEEP'],
           WHEAT: client.data.resources['WHEAT'],
           WOOD: client.data.resources['WOOD'],
