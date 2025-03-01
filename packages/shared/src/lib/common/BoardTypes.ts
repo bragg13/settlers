@@ -92,6 +92,7 @@ export type DeltaDetail = {
   [GameAction.ActionDiceRoll]: {
     dice: Array<number>;
     tiles: Array<Tile['id']>;
+    spots: Array<Spot['id']>;
   };
 
   [GameAction.ActionMoveRobber]: { placeholder: number };

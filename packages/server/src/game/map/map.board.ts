@@ -56,12 +56,16 @@ export class MapBoard {
       this.roadsGraph[i] = {};
     }
 
+    console.log(config);
     if (!config) {
       this.initBoard();
     } else {
       const tiles = JSON.parse(config.tiles);
       this.tiles = new Map<Tile['id'], Tile>();
       for (const tile of Object.keys(tiles)) {
+        console.log(
+          `tile ${tiles[tile].id} has resource ${tiles[tile].resource}`
+        );
         this.tiles.set(parseInt(tile), tiles[tile]);
       }
 
@@ -81,7 +85,6 @@ export class MapBoard {
         // replace old owner's socketId with new one through our mapping
         if (spot.owner) spot.owner = socketsMapping[spot.owner];
         this.spots.set(parseInt(spotId), spot);
-        console.log(spot);
       }
       // this.deltas = [...JSON.parse(config.deltas)];
     }
@@ -416,6 +419,7 @@ export class MapBoard {
     );
     console.log('tiles');
     console.log(tiles);
+    console.log(tilesIds);
     console.log('spotsOnTiles');
     console.log(spotsOnTiles);
 
@@ -424,7 +428,8 @@ export class MapBoard {
       player,
       details: {
         dice,
-        tiles: Array.from(tiles.keys()),
+        tiles: tiles.map((el) => el.id),
+        spots: spotsOnTiles.map((el) => el.id),
       },
       timestamp: Date.now(),
     });

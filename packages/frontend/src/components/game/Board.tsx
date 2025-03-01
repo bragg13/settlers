@@ -33,13 +33,17 @@ const Board = () => {
     const roads = JSON.parse(lobbyState.boardState?.roads as string);
 
     // initialise tiles only once, at beginning of game
-    if (tiles.length === 0) {
-      setTiles(Object.values(boardTiles));
-    }
+    // if (tiles.length === 0) {
+    setTiles(Object.values(boardTiles));
+    // }
     setSpots(Object.values(spots));
     setRoads(Object.values(roads));
     console.log('Board updated.');
-  }, [lobbyState.boardState?.roads, lobbyState.boardState?.spots]);
+  }, [
+    lobbyState.boardState?.tiles,
+    lobbyState.boardState?.roads,
+    lobbyState.boardState?.spots,
+  ]);
 
   const getPlayer = (player: string): Player => {
     const pg = lobbyState.players.find((el) => {
@@ -141,8 +145,13 @@ const Board = () => {
     <>
       <group name="tiles" key="tiles">
         {tiles.map((tileData, index) => {
-          console.log(tileData.resource);
-          console.log(tileResourceToModel[tileData.resource]);
+          console.log(
+            `tile ${tileData.id} has resource ${
+              tileData.resource
+            }, so the component is ${
+              tileResourceToModel[tileData.resource].name
+            }`
+          );
           const TileComponent = tileResourceToModel[tileData.resource];
           const value = `NUM${tileData.value}`;
           const position: Vector3 = [
@@ -157,15 +166,27 @@ const Board = () => {
             return (
               <>
                 <TileValueComponent
-                  key={index + 20}
+                  key={`tilevalue${index}`}
                   position={[position[0], position[1] + 0.5, position[2]]}
                   scale={tileValueScale}
+                  animationsQueue={tileData.animationsQueue}
                 />
-                <TileComponent key={index} position={position} />;
+                <TileComponent
+                  animationsQueue={tileData.animationsQueue}
+                  key={`tile${index}`}
+                  position={position}
+                />
+                ;
               </>
             );
           }
-          return <TileComponent key={index} position={position} />;
+          return (
+            <TileComponent
+              animationsQueue={tileData.animationsQueue}
+              key={`tile${index}`}
+              position={position}
+            />
+          );
         })}
       </group>
 
@@ -178,7 +199,6 @@ const Board = () => {
             canSpawnSpot && spotData.settlementType !== 'unbuildable';
           availableActions.buildableSpots?.includes(spotData.id);
           const renderable = spotData.owner !== null;
-          if (renderable) console.log(spotData.id);
 
           if (!spawnable && !renderable) return null;
           return spotRender(spotData, index, onSpawnableClicked, getPlayer);

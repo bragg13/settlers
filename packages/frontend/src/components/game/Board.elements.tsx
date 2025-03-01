@@ -31,7 +31,7 @@ export const spotRender = (
 
   return spotData.owner !== null ? (
     <Town3D
-      key={index}
+      key={`town${index}`}
       color={getPlayer(spotData.owner as string).color}
       spotData={spotData}
       position={position}
@@ -40,7 +40,7 @@ export const spotRender = (
     />
   ) : (
     <Spot3D
-      key={index}
+      key={`spot${index}`}
       spotData={spotData}
       position={position}
       selectable={selectable}
@@ -68,7 +68,7 @@ export const roadRender = (
   const selectable = true;
   return (
     <Road3D
-      key={index}
+      key={`road${index}`}
       color={getPlayer(roadData.owner as string).color}
       roadData={roadData}
       position={position}

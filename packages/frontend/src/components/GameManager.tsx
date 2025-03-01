@@ -20,10 +20,11 @@ const GameManager = () => {
     sm.connect();
 
     const onGameMessage = (data: ServerPayloads[ServerEvents.GameMessage]) => {
-      showNotification({
-        message: data.message,
-        color: data.color,
-      });
+      // TODO: restore at some point
+      // showNotification({
+      //   message: data.message,
+      //   color: data.color,
+      // });
     };
 
     const onPlayerInformation = (
