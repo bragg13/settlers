@@ -23,6 +23,7 @@ export type roadScreenPosition = {
 export type tileBoardPosition = {
   q: number;
   r: number;
+  spots: Array<Spot['id']>;
 };
 
 // settlement

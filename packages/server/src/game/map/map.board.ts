@@ -406,22 +406,58 @@ export class MapBoard {
   public rollDice(player: Socket['id']): DiceRollResult {
     const dice = [randomInt(1, 7), randomInt(1, 7)];
     const diceSum = dice[0] + dice[1];
-    const resourceToPlayer = {};
-    const tiles = Array.from(this.tiles.values()).filter(
-      (tile) => parseInt(tile.value) === diceSum
-    );
+    const resourceToPlayer: {
+      [key: Socket['id']]: ServerPayloads[ServerEvents.ResourcesGathered];
+    } = {};
+    const tiles = Array.from(this.tiles.values())
+      .filter((tile) => parseInt(tile.value) === diceSum)
+      .map((tile) => {
+        const activeSpots = tile.position.board.spots
+          .filter((spotId) => this.spots.get(spotId).owner !== null)
+          .map((spotId) => this.spots.get(spotId));
+        return {
+          id: tile.id,
+          resource: tile.resource,
+          spots: activeSpots,
+        };
+      });
     const tilesIds = tiles.map((el) => el.id);
-    const spotsOnTiles = Array.from(this.spots.values()).filter(
-      (spot) =>
-        spot.owner !== null &&
-        // intersection between tiles that produce and tiles of the spot
-        spot.position.board.tiles.filter((el) => tilesIds.includes(el)).length >
-          0
-    );
+    const spotsOnTiles = Array.from(this.spots.values())
+      .filter(
+        (spot) =>
+          spot.owner !== null &&
+          // intersection between tiles that produce and tiles of the spot
+          spot.position.board.tiles.filter((el) => tilesIds.includes(el))
+            .length > 0
+      )
+      .map((spot) => {
+        const tileIds = spot.position.board.tiles.filter((el) =>
+          tilesIds.includes(el)
+        );
+
+        return {
+          owner: spot.owner,
+          id: spot.id,
+          resource: Array.from(this.tiles.values())
+            .filter((tile) => tileIds.includes(tile.id))
+            .map((tile) => tile.resource),
+        };
+      });
     Logger.log(`Harvesting on:`);
     console.log(tiles);
     Logger.log('Spots that will harvest:');
     console.log(spotsOnTiles);
+    for (const spot of spotsOnTiles) {
+      if (!Object.keys(resourceToPlayer).includes(spot.owner)) {
+        resourceToPlayer[spot.owner] = {
+          BRICK: 0,
+          ORE: 0,
+          SHEEP: 0,
+          WHEAT: 0,
+          WOOD: 0,
+        };
+      }
+    }
 
     this.deltas.push({
       action: GameAction.ActionDiceRoll,

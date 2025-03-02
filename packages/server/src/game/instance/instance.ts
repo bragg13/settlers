@@ -225,20 +225,26 @@ export class Instance {
 
   public onDiceRoll(client: AuthenticatedSocket, data: any): void {
     const { diceResult, resourceToPlayer } = this.board.rollDice(client.id);
-    // no need to go to next turns, but lets update the FSM state
-    this.fsm.transitionTo(diceResult === 7 ? 'ROBBERS' : 'TURN');
-    this.dispatchDeltaUpdate();
 
-    // send to each player which resource they gathered
-    for (const player of this.lobby.clients.keys()) {
-      this.lobby.dispatchToPlayer(
-        player,
-        ServerEvents.ResourcesGathered,
-        resourceToPlayer[player]
-      );
+    // DEBUG
+    if (diceResult == 7) {
+      this.dispatchAvailableActions();
+    } else {
+      // no need to go to next turns, but lets update the FSM state
+      this.fsm.transitionTo(diceResult === 7 ? 'ROBBERS' : 'TURN');
+      this.dispatchDeltaUpdate();
+
+      // send to each player which resource they gathered
+      for (const player of this.lobby.clients.keys()) {
+        this.lobby.dispatchToPlayer(
+          player,
+          ServerEvents.ResourcesGathered,
+          resourceToPlayer[player]
+        );
+      }
+
+      this.dispatchAvailableActions();
     }
-
-    this.dispatchAvailableActions();
   }
 
   public onEndTurn(client: AuthenticatedSocket): void {
