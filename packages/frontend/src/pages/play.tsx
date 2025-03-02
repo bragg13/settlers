@@ -9,7 +9,7 @@ import {
 } from '../components/game/GameContext';
 import Chat from '../components/ui/chat';
 import MainScene from '../components/game/MainScene';
-import { Stats, OrbitControls, Environment } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 
 const PlayPage = () => {
   const { playerInformation } = usePlayerInformation();
@@ -35,9 +35,17 @@ const PlayPage = () => {
         {/* inventory */}
         <Typography variant="caption">
           WOOD: {playerInformation.resources?.WOOD}
+        </Typography>
+        <Typography variant="caption">
           WHEAT: {playerInformation.resources?.WHEAT}
+        </Typography>
+        <Typography variant="caption">
           SHEEP: {playerInformation.resources?.SHEEP}
+        </Typography>
+        <Typography variant="caption">
           ORE: {playerInformation.resources?.ORE}
+        </Typography>
+        <Typography variant="caption">
           BRICK: {playerInformation.resources?.BRICK}
         </Typography>
       </Stack>
