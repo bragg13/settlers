@@ -20,23 +20,6 @@ const PlayPage = () => {
 
   return (
     <>
-      <Canvas
-        dpr={[1, 2]} // Limit pixel ratio
-        performance={{ min: 0.5 }} // Allow frame drops
-        frameloop="demand" // Only render when needed
-        gl={{
-          powerPreference: 'high-performance',
-          antialias: false, // Disable antialiasing in dev
-        }}
-        camera={{ position: [0, 1.5, 2.5] }}
-      >
-        <MainScene />
-        <Stats />
-        {/* <axesHelper args={[15]} /> */}
-        <OrbitControls />
-        {/* <gridHelper /> */}
-      </Canvas>
-
       <Stack direction="row" gap={4}>
         {/* username */}
         <Typography
@@ -57,7 +40,22 @@ const PlayPage = () => {
           ORE: {playerInformation.resources?.ORE}
           BRICK: {playerInformation.resources?.BRICK}
         </Typography>
+      </Stack>
+      <Canvas
+        dpr={[1, 2]} // Limit pixel ratio
+        performance={{ min: 0.5 }} // Allow frame drops
+        frameloop="demand" // Only render when needed
+        gl={{
+          powerPreference: 'high-performance',
+          antialias: false, // Disable antialiasing in dev
+        }}
+        camera={{ position: [0, 1.5, 2.5] }}
+      >
+        <MainScene />
+        <OrbitControls />
+      </Canvas>
 
+      <Stack direction="row" gap={4}>
         <Button
           id="rollDice"
           variant="contained"
