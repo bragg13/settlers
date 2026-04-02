@@ -1,4 +1,5 @@
 import { useControls } from 'leva';
+import * as THREE from 'three';
 import Board from './Board';
 import { Sea } from '../models/Sea';
 import { Road3D } from '../models/Road3D';
@@ -15,6 +16,12 @@ const MainScene = () => {
 
   return (
     <>
+      <color attach="background" args={['#87CEEB']} />
+      <fog attach="fog" args={['#87CEEB', 90, 120]} />
+      <mesh>
+        <sphereGeometry args={[500, 32, 32]} />
+        <meshBasicMaterial color="#87CEEB" side={THREE.BackSide} />
+      </mesh>
       <Sea />
       <directionalLight position={[10, 8, 8]} intensity={3.14} />
       <Board />
