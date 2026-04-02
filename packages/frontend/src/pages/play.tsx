@@ -20,6 +20,16 @@ const PlayPage = () => {
 
   return (
     <>
+      <Typography
+        variant="overline"
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          alignSelf: 'center',
+        }}
+      >
+        Settlers of Catan - 3D remix
+      </Typography>
       <Stack direction="row" gap={4}>
         {/* username */}
         <Typography
@@ -34,28 +44,29 @@ const PlayPage = () => {
 
         {/* inventory */}
         <Typography variant="caption">
-          WOOD: {playerInformation.resources?.WOOD}
+          🌲 WOOD: {playerInformation.resources?.WOOD}
         </Typography>
         <Typography variant="caption">
-          WHEAT: {playerInformation.resources?.WHEAT}
+          🌾 WHEAT: {playerInformation.resources?.WHEAT}
         </Typography>
         <Typography variant="caption">
-          SHEEP: {playerInformation.resources?.SHEEP}
+          🐑 SHEEP: {playerInformation.resources?.SHEEP}
         </Typography>
         <Typography variant="caption">
-          ORE: {playerInformation.resources?.ORE}
+          ⛏️ ORE: {playerInformation.resources?.ORE}
         </Typography>
         <Typography variant="caption">
-          BRICK: {playerInformation.resources?.BRICK}
+          🧱 BRICK: {playerInformation.resources?.BRICK}
         </Typography>
       </Stack>
       <Canvas
-        dpr={[1, 2]} // Limit pixel ratio
+        // dpr={[1, 2]} // Limit pixel ratio
         performance={{ min: 0.5 }} // Allow frame drops
         frameloop="demand" // Only render when needed
+        style={{ margin: '5px', height: '90%', border: '2px solid lightgrey' }}
         gl={{
           powerPreference: 'high-performance',
-          antialias: false, // Disable antialiasing in dev
+          antialias: true, // Disable antialiasing in dev
         }}
         camera={{ position: [0, 1.5, 2.5] }}
       >
@@ -66,8 +77,8 @@ const PlayPage = () => {
       <Stack direction="row" gap={4}>
         <Button
           id="rollDice"
-          variant="contained"
-          color="primary"
+          variant="outlined"
+          color="info"
           disabled={
             !isPlaying ||
             !availableActions.availableActions.includes(
@@ -78,7 +89,7 @@ const PlayPage = () => {
             sm.emit({ event: GameAction.ActionDiceRoll, data: {} });
           }}
         >
-          dice
+          🎲
         </Button>
         <Button
           id="saveGame"
