@@ -1,4 +1,4 @@
-import { Box } from '@react-three/drei';
+import { Box, useGLTF } from '@react-three/drei';
 import { JSX } from 'react/jsx-runtime';
 import { useSocketManager } from '../../hooks/useSocketManager';
 import { ClientPayloads, GameAction, Road, Spot } from '@settlers/shared';
@@ -8,6 +8,14 @@ import { animated, useSpring } from '@react-spring/three';
 import { Mesh } from 'three';
 
 export function Road3D(props: Road3DProps) {
+  const { scene } = useGLTF('/models/road.glb');
+  const clone = scene.clone();
+
+  // Tint it to the player color
+  clone.traverse((child) => {
+    if (child.isMesh) child.material = child.material.clone();
+    if (child.isMesh) child.material.color.set(props.color);
+  });
   // a road is visible if it's about to be selected, or if it had an owner
   const meshRef = useRef<Mesh>(null!);
   const springs = useSpring({
@@ -24,30 +32,38 @@ export function Road3D(props: Road3DProps) {
     },
     loop: true,
   });
-  return (
-    <Box
-      onClick={() =>
-        props.onClicked(GameAction.ActionSetupRoad, {
-          roadId: props.roadData.id,
-          spot1: props.roadData.position.board.from,
-          spot2: props.roadData.position.board.to,
-        })
-      }
-      position={props.position}
-      rotation-y={props.roadData.position.screen.yangle}
-      scale={[0.35, 0.1, 0.065]}
-    >
-      {props.roadData.owner === null ? (
+
+  if (props.roadData.owner === null) {
+    return (
+      <Box
+        onClick={() =>
+          props.onClicked(GameAction.ActionSetupRoad, {
+            roadId: props.roadData.id,
+            spot1: props.roadData.position.board.from,
+            spot2: props.roadData.position.board.to,
+          })
+        }
+        position={props.position}
+        rotation-y={props.roadData.position.screen.yangle}
+        scale={[0.35, 0.1, 0.065]}
+      >
         <animated.meshStandardMaterial
           color="white"
           transparent
           opacity={springs.alpha}
         />
-      ) : (
-        <meshStandardMaterial color={props.color} transparent opacity={1} />
-      )}
-    </Box>
-  );
+      </Box>
+    );
+  } else {
+    return (
+      <primitive
+        rotation-y={props.roadData.position.screen.yangle}
+        object={clone}
+        position={props.position}
+        scale={[0.18, 0.2, 0.2]}
+      />
+    );
+  }
 }
 
 interface Road3DProps {
