@@ -1,5 +1,8 @@
 # Settlers
 
+<img width="1512" height="945" alt="image" src="https://github.com/user-attachments/assets/0674d75e-d9da-49a5-b6ae-efe48ac65c2b" />
+
+
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
 ✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
